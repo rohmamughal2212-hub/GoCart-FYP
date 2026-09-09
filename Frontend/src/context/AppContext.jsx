@@ -47,7 +47,6 @@ export const AppContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userLoading, setUserLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
-  const [totalProductCount, setTotalProductCount] = useState(0);
   const [showUserLogin, setShowUserLogin] = useState(false);
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
@@ -102,7 +101,6 @@ export const AppContextProvider = ({ children }) => {
     try {
       const { data } = await axios.get("/api/product/list?limit=1000");
       if (data && data.success) {
-        setTotalProductCount(Number(data.total) || 0);
         // Filter products to only include the 8 allowed categories.
         // Use substring, case-insensitive match so categories like
         // "Baby Items" count for allowed key "Baby".
@@ -241,7 +239,7 @@ export const AppContextProvider = ({ children }) => {
   const value = {
     navigate, user, setUser, userLoading, productsLoading,
     showUserLogin, setShowUserLogin,
-    products, totalProductCount, fetchProducts,
+    products, fetchProducts,
     cartItems, setCartItems,
     addToCart, updateCartItem, removeFromCart,
     cartCount, totalCartAmount,

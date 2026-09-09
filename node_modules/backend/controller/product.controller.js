@@ -231,12 +231,18 @@ export const getProducts = async (req, res) => {
     const limitNum = Number(limit);
     const skip = (pageNum - 1) * limitNum;
 
-    const [productsFromDb, total] = await Promise.all([
-      limitNum === 0
-        ? Product.find(query).sort(sortObj)
-        : Product.find(query).sort(sortObj).skip(skip).limit(limitNum),
-      Product.countDocuments(query),
-    ]);
+    let productsFromDb = [];
+    let total = 0;
+    try {
+      [productsFromDb, total] = await Promise.all([
+        limitNum === 0
+          ? Product.find(query).sort(sortObj)
+          : Product.find(query).sort(sortObj).skip(skip).limit(limitNum),
+        Product.countDocuments(query),
+      ]);
+    } catch (databaseError) {
+      console.warn("Product database query failed; using fallback products:", databaseError.message);
+    }
 
     // If DB returned results, use them
     if (total && total > 0) {
