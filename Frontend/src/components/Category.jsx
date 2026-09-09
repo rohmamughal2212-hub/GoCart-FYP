@@ -25,7 +25,7 @@ const Category = () => {
     return cnt;
   });
 
-  const totalForEight = counts.reduce((s, n) => s + Math.min(5, n), 0);
+  const totalForEight = counts.reduce((s, n) => s + n, 0);
 
   return (
     <div className="mt-16">
