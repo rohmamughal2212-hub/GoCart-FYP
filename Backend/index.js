@@ -61,7 +61,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.redirect('https://gocart-frontend.vercel.app');
+  res.status(200).json({ success: true, message: 'GoCart API is running' });
 });
 
 // Minimal request logger (production-safe)
