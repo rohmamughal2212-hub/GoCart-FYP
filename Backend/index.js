@@ -40,12 +40,17 @@ const allowedOrigins = [
   .filter(Boolean)
   .map((origin) => origin.replace(/"/g, ""));
 
+const isAllowedOrigin = (origin) => (
+  allowedOrigins.includes(origin)
+  || origin === "https://gocart-fyp.vercel.app"
+);
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) {
       return callback(null, true);
     }
-    if (allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
     return callback(new Error(`CORS policy: Origin ${origin} not allowed`));
