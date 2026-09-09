@@ -11,7 +11,7 @@ const isExcludedProduct = (product) => (
 );
 
 const Category = () => {
-  const { navigate, products } = useAppContext();
+  const { navigate, products, totalProductCount } = useAppContext();
   const counts = (categories || []).slice(0, 8).map((category) => {
     const catKey = (category.path || category.text || "").toString().toLowerCase().trim();
     const cnt = (products || []).reduce(
@@ -25,7 +25,7 @@ const Category = () => {
     return cnt;
   });
 
-  const totalForEight = (products || []).length;
+  const totalForEight = totalProductCount || (products || []).length;
 
   return (
     <div className="mt-16">
