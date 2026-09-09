@@ -45,6 +45,14 @@ const isAllowedOrigin = (origin) => (
   || origin === "https://gocart-fyp.vercel.app"
 );
 
+app.use((req, res, next) => {
+  res.setHeader("Vary", "Origin");
+  if (req.path.startsWith("/api/")) {
+    res.setHeader("Cache-Control", "no-store");
+  }
+  next();
+});
+
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) {
