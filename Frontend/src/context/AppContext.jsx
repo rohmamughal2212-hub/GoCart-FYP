@@ -99,7 +99,7 @@ export const AppContextProvider = ({ children }) => {
   const fetchProducts = async (retry = 0) => {
     setProductsLoading(true);
     try {
-      const { data } = await axios.get("/api/product/list?limit=1000");
+      const { data } = await axios.get(`/api/product/list?limit=1000&_=${Date.now()}`);
       if (data && data.success) {
         // Filter products to only include the 8 allowed categories.
         // Use substring, case-insensitive match so categories like

@@ -175,6 +175,12 @@ export const addProduct = async (req, res) => {
 //   limit       – items per page (default 12; pass 0 for all)
 export const getProducts = async (req, res) => {
   try {
+    res.set({
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
+    });
+
     const {
       search,
       categories,
