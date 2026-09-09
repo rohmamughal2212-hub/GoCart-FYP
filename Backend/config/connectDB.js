@@ -14,6 +14,7 @@ import {
   findFallbackAddressById,
   updateFallbackAddress,
   deleteFallbackAddress,
+  findProductsFallback,
   findProductByIdFallback,
   aggregateProductsFallback,
   createFallbackOrder,
@@ -34,6 +35,22 @@ import {
 
 let isConnected = false;
 export let dbAvailable = false;
+
+const syncFallbackProductsToMongo = async () => {
+  const existingProduct = await Product.findOne({ name: "Soft Baby Blanket" });
+  if (existingProduct) return;
+
+  const fallbackProducts = findProductsFallback({});
+  if (!Array.isArray(fallbackProducts) || fallbackProducts.length === 0) return;
+
+  const productsToInsert = fallbackProducts.map((product) => {
+    const { id, _id, updatedAt, ...fields } = product;
+    return mongoose.isValidObjectId(_id) ? { ...fields, _id } : fields;
+  });
+
+  await Product.insertMany(productsToInsert, { ordered: false });
+  console.log(`Synced ${productsToInsert.length} fallback products to MongoDB.`);
+};
 
 const getMongoUri = () => {
   if (process.env.MONGO_URI) return process.env.MONGO_URI;
@@ -191,6 +208,11 @@ export const connectDB = async () => {
     await mongoose.connect(uri);
     isConnected = true;
     dbAvailable = true;
+    try {
+      await syncFallbackProductsToMongo();
+    } catch (error) {
+      console.warn("Could not sync fallback products to MongoDB:", error.message);
+    }
     console.log("MongoDB connected");
   } catch (error) {
     dbAvailable = false;
