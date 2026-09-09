@@ -461,7 +461,7 @@ const updateFallbackProduct = (id, updateFields) => {
 
 router.put("/products/:id", async (req, res) => {
   const { id } = req.params;
-  const { price, offerPrice, stock } = req.body;
+  const { name, price, offerPrice, stock } = req.body;
   const updateFields = {};
 
   if (price !== undefined) updateFields.price = Number(price);
@@ -481,6 +481,11 @@ router.put("/products/:id", async (req, res) => {
         if (error.name !== "CastError") throw error;
       }
       if (updated) return res.json({ success: true, product: updated });
+
+      if (name) {
+        updated = await Product.findOneAndUpdate({ name }, updateFields, { new: true });
+        if (updated) return res.json({ success: true, product: updated });
+      }
 
       const fallbackProduct = updateFallbackProduct(id, updateFields);
       if (!fallbackProduct) return res.status(404).json({ success: false, message: "Product not found" });

@@ -365,6 +365,7 @@ const AdminDashboard = () => {
     setSavingProduct(true);
     try {
       const payload = {
+        name: productToEdit.name || productToEdit.title,
         price: Number(editPrice),
         offerPrice: Number(editOfferPrice),
         stock: Number(editStock),
