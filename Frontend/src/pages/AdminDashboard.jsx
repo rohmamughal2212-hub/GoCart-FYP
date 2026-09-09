@@ -402,23 +402,6 @@ const AdminDashboard = () => {
 
         const targetId = productToEdit._id || productToEdit.id;
 
-        setProducts((prev) =>
-          prev.map((item) => {
-            const itemId = item._id || item.id;
-            if (String(itemId) !== String(targetId)) return item;
-
-            return {
-              ...item,
-              ...normalizedSavedProduct,
-              name: normalizedSavedProduct.name || item.name || item.title,
-              price: Number(normalizedSavedProduct.price ?? item.price ?? 0),
-              offerPrice: Number(normalizedSavedProduct.offerPrice ?? item.offerPrice ?? 0),
-              stock: Number(normalizedSavedProduct.stock ?? item.stock ?? 0),
-              inStock: Number(normalizedSavedProduct.stock ?? item.stock ?? 0) > 0,
-            };
-          })
-        );
-
         setProductCategories((prev) =>
           prev.map(([category, items]) => [
             category,
