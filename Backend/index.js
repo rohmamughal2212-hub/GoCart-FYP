@@ -2,7 +2,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { connectDB } from "./config/connectDB.js";
+import mongoose from "mongoose";
+import { connectDB, dbAvailable } from "./config/connectDB.js";
 import { connectCloudinary } from "./config/cloudinary.js";
 
 import userRoutes from "./routes/user.routes.js";
@@ -96,7 +97,17 @@ app.use((err, req, res, next) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Server is running', uptime: process.uptime() });
+  res.status(200).json({
+    success: true,
+    message: 'Server is running',
+    uptime: process.uptime(),
+    database: {
+      configured: Boolean(process.env.MONGO_URI),
+      available: dbAvailable,
+      readyState: mongoose.connection.readyState,
+      name: mongoose.connection.name || null,
+    },
+  });
 });
 
 const mount = (pathStr, handler) => {
