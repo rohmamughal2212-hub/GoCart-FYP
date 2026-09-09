@@ -1,0 +1,8 @@
+{
+  "ignore": [
+    "**/temp_*.mjs",
+    "Backend/temp_wildcard_test.mjs",
+    "backend/temp_wildcard_test.mjs"
+  ],
+  "legacyWatch": true
+}

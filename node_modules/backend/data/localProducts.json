@@ -1,0 +1,547 @@
+[
+  {
+    "name": "Basmati Rice 1kg",
+    "category": "Grocery",
+    "price": 420,
+    "offerPrice": 350,
+    "inStock": true,
+    "image": [
+      "/images/basmati-rice-1kg.png"
+    ],
+    "description": [
+      "Premium long grain",
+      "Ideal for biryani",
+      "Aromatic basmati rice"
+    ]
+  },
+  {
+    "name": "Chicken Drumsticks 500g",
+    "category": "Meat",
+    "price": 599,
+    "offerPrice": 499,
+    "inStock": true,
+    "image": [
+      "/images/chicken-drumsticks-500g.png"
+    ],
+    "description": [
+      "Fresh farm chicken",
+      "Juicy and tender",
+      "Perfect for grilling"
+    ]
+  },
+  {
+    "name": "Glow Face Wash 200ml",
+    "category": "Beauty",
+    "price": 730,
+    "offerPrice": 670,
+    "inStock": true,
+    "image": [
+      "/images/glow-face-wash-200ml.png"
+    ],
+    "description": [
+      "Brightening formula",
+      "Gentle daily cleanser",
+      "Leaves skin refreshed"
+    ]
+  },
+  {
+    "name": "Non-Stick Frying Pan 28cm",
+    "category": "Kitchen",
+    "price": 2999,
+    "offerPrice": 2350,
+    "inStock": true,
+    "image": [
+      "/images/non-stick-frying-pan-28cm.png"
+    ],
+    "description": [
+      "Premium non-stick coating",
+      "28cm diameter",
+      "Easy to clean"
+    ]
+  },
+  {
+    "name": "Striped Polo Shirt",
+    "category": "Garments",
+    "price": 1950,
+    "offerPrice": 1333,
+    "inStock": true,
+    "image": [
+      "/images/striped-polo-shirt.png"
+    ],
+    "description": [
+      "Classic polo collar",
+      "Soft cotton blend",
+      "Smart casual style"
+    ]
+  },
+  {
+    "name": "Women's Slim Fit Jeans",
+    "category": "Garments",
+    "price": 4999,
+    "offerPrice": 4400,
+    "inStock": true,
+    "image": [
+      "/images/womens-slim-fit-jeans.png"
+    ],
+    "description": [
+      "Stretchy denim fabric",
+      "Slim silhouette",
+      "Comfortable everyday wear"
+    ]
+  },
+  {
+    "name": "Casual Hooded Sweatshirt",
+    "category": "Garments",
+    "price": 6300,
+    "offerPrice": 5220,
+    "inStock": true,
+    "image": [
+      "/images/casual-hooded-sweatshirt.png"
+    ],
+    "description": [
+      "Soft fleece lining",
+      "Adjustable hood",
+      "Relaxed fit"
+    ]
+  },
+  {
+    "name": "Floral Maxi Dress",
+    "category": "Garments",
+    "price": 9999,
+    "offerPrice": 6800,
+    "inStock": true,
+    "image": [
+      "/images/floral-maxi-dress.png"
+    ],
+    "description": [
+      "Lightweight floral print",
+      "Floor-length style",
+      "Comfortable summer wear"
+    ]
+  },
+  {
+    "name": "Chambray Button-Down Shirt",
+    "category": "Garments",
+    "price": 1975,
+    "offerPrice": 1499,
+    "inStock": true,
+    "image": [
+      "/images/chambray-button-down-shirt.png"
+    ],
+    "description": [
+      "Soft chambray fabric",
+      "Button-down collar",
+      "Perfect for layered outfits"
+    ]
+  },
+  {
+    "name": "Soft Baby Blanket",
+    "category": "Baby Items",
+    "price": 2380,
+    "offerPrice": 1999,
+    "inStock": true,
+    "image": [
+      "/images/soft-baby-blanket.png"
+    ],
+    "description": [
+      "Anti-slip surface",
+      "Extra thick 6mm",
+      "Includes carry strap"
+    ]
+  },
+  {
+    "name": "Fresh Chicken 1kg",
+    "category": "Grocery",
+    "price": 430,
+    "offerPrice": 390,
+    "inStock": true,
+    "image": [
+      "/images/fresh-chicken-1kg.png"
+    ],
+    "description": [
+      "Farm fresh",
+      "Cleaned and packed",
+      "Ready for cooking"
+    ]
+  },
+  {
+    "name": "Beef Steak 1kg",
+    "category": "Meat",
+    "price": 2350,
+    "offerPrice": 1999,
+    "inStock": true,
+    "image": [
+      "/images/beef-steak-1kg.png"
+    ],
+    "description": [
+      "Premium beef steak",
+      "Rich in flavor",
+      "Cook to preferred doneness"
+    ]
+  },
+  {
+    "name": "Silk Lipstick Set",
+    "category": "Beauty",
+    "price": 1399,
+    "offerPrice": 1199,
+    "inStock": true,
+    "image": [
+      "/images/silk-lipstick-set.png"
+    ],
+    "description": [
+      "Long-lasting color",
+      "Smooth satin finish",
+      "Includes 3 shades"
+    ]
+  },
+  {
+    "name": "Stainless Steel Cookware Set",
+    "category": "Kitchen",
+    "price": 7700,
+    "offerPrice": 6500,
+    "inStock": true,
+    "image": [
+      "/images/stainless-steel-cookware-set.png"
+    ],
+    "description": [
+      "Durable stainless steel",
+      "Includes 5 pieces",
+      "Oven safe"
+    ]
+  },
+  {
+    "name": "Organic Baby Lotion",
+    "category": "Baby Items",
+    "price": 620,
+    "offerPrice": 550,
+    "inStock": true,
+    "image": [
+      "/images/organic-baby-lotion.png"
+    ],
+    "description": [
+      "Cast iron with rubber grip",
+      "Quick-adjust mechanism",
+      "10 weight settings"
+    ]
+  },
+  {
+    "name": "Fresh Milk 1L",
+    "category": "Grocery",
+    "price": 399,
+    "offerPrice": 350,
+    "inStock": true,
+    "image": [
+      "/images/fresh-milk-1l.png"
+    ],
+    "description": [
+      "Full cream milk",
+      "Pasteurised",
+      "Rich in calcium"
+    ]
+  },
+  {
+    "name": "Fresh Fish 1kg",
+    "category": "Meat",
+    "price": 1250,
+    "offerPrice": 899,
+    "inStock": true,
+    "image": [
+      "/images/fresh-fish-1kg.png"
+    ],
+    "description": [
+      "Ocean-fresh fish",
+      "Rich in protein",
+      "Great for pan-frying"
+    ]
+  },
+  {
+    "name": "Rose Perfume Spray 50ml",
+    "category": "Beauty",
+    "price": 1750,
+    "offerPrice": 1499,
+    "inStock": true,
+    "image": [
+      "/images/rose-perfume-spray-50ml.png"
+    ],
+    "description": [
+      "Fresh floral scent",
+      "Fine mist spray",
+      "Lasts all day"
+    ]
+  },
+  {
+    "name": "Electric Kettle 1.7L",
+    "category": "Kitchen",
+    "price": 1999,
+    "offerPrice": 1640,
+    "inStock": true,
+    "image": [
+      "/images/electric-kettle-1.7l.png"
+    ],
+    "description": [
+      "Rapid boil technology",
+      "1.7-litre capacity",
+      "Auto shut-off"
+    ]
+  },
+  {
+    "name": "Baby Stroller",
+    "category": "Baby Items",
+    "price": 8300,
+    "offerPrice": 6900,
+    "inStock": true,
+    "image": [
+      "/images/baby-stroller.png"
+    ],
+    "description": [
+      "In-mould EPS liner",
+      "12 ventilation channels",
+      "Adjustable fit system"
+    ]
+  },
+  {
+    "name": "Cooking Oil 1L",
+    "category": "Grocery",
+    "price": 640,
+    "offerPrice": 615,
+    "inStock": true,
+    "image": [
+      "/images/cooking-oil-1l.png"
+    ],
+    "description": [
+      "Refined cooking oil",
+      "Suitable for frying",
+      "1 litre bottle"
+    ]
+  },
+  {
+    "name": "Chicken Sausages 500g",
+    "category": "Meat",
+    "price": 1500,
+    "offerPrice": 1299,
+    "inStock": true,
+    "image": [
+      "/images/Chicken-Sausages-500g.png"
+    ],
+    "description": [
+      "Smoked chicken sausages",
+      "Ready to cook",
+      "Perfect for breakfast"
+    ]
+  },
+  {
+    "name": "Keratin Hair Serum 100ml",
+    "category": "Beauty",
+    "price": 1580,
+    "offerPrice": 1370,
+    "inStock": true,
+    "image": [
+      "/images/keratin-hair-serum-100ml.png"
+    ],
+    "description": [
+      "Smoothens frizz",
+      "Adds shine",
+      "Easy application"
+    ]
+  },
+  {
+    "name": "Ceramic Dinner Plate Set",
+    "category": "Kitchen",
+    "price": 3750,
+    "offerPrice": 3200,
+    "inStock": true,
+    "image": [
+      "/images/ceramic-dinner-plate-set.png"
+    ],
+    "description": [
+      "6-piece plate set",
+      "Elegant ceramic finish",
+      "Dishwasher safe"
+    ]
+  },
+  {
+    "name": "Baby Diaper Pack",
+    "category": "Baby Items",
+    "price": 1280,
+    "offerPrice": 1150,
+    "inStock": true,
+    "image": [
+      "/images/baby-diaper-pack.png"
+    ],
+    "description": [
+      "2 rackets + 3 shuttlecocks",
+      "Aluminium frame",
+      "Includes carry bag"
+    ]
+  },
+  {
+    "name": "Whole Wheat Flour 1kg",
+    "category": "Grocery",
+    "price": 310,
+    "offerPrice": 250,
+    "inStock": true,
+    "image": [
+      "/images/whole-wheat-flour-1kg.png"
+    ],
+    "description": [
+      "Atta",
+      "Stone ground",
+      "1 kilogram pack"
+    ]
+  },
+  {
+    "name": "Eggs Dozen",
+    "category": "Grocery",
+    "price": 250,
+    "offerPrice": 199,
+    "inStock": true,
+    "image": [
+      "/images/eggs-dozen.png"
+    ],
+    "description": [
+      "Farm fresh eggs",
+      "12-pack",
+      "Rich in protein"
+    ]
+  },
+  {
+    "name": "Vitamin C Facial Cleanser 150ml",
+    "category": "Beauty",
+    "price": 635,
+    "offerPrice": 580,
+    "inStock": true,
+    "image": [
+      "/images/vitamin-c-facial-cleanser-150ml.png"
+    ],
+    "description": [
+      "Brightens skin tone",
+      "Gentle foaming cleanser",
+      "Packed with vitamin C"
+    ]
+  },
+  {
+    "name": "Premium Kitchen Knife Set",
+    "category": "Kitchen",
+    "price": 1750,
+    "offerPrice": 1299,
+    "inStock": true,
+    "image": [
+      "/images/premium-kitchen-knife-set.png"
+    ],
+    "description": [
+      "5-piece knife collection",
+      "High-carbon steel",
+      "Comfort grip handles"
+    ]
+  },
+  {
+    "name": "Premium Kitchen Knife Set",
+    "category": "Kitchen",
+    "price": 1750,
+    "offerPrice": 1299,
+    "inStock": true,
+    "image": [
+      "/images/premium-kitchen-knife-set.png"
+    ],
+    "description": [
+      "5-piece knife collection",
+      "High-carbon steel",
+      "Comfort grip handles"
+    ]
+  },
+  {
+    "name": "Baby Feeding Bottle",
+    "category": "Baby Items",
+    "price": 1650,
+    "offerPrice": 1300,
+    "inStock": true,
+    "image": [
+      "/images/baby-feeding-bottle.png"
+    ],
+    "description": [
+      "BPA-free Tritan plastic",
+      "Leak-proof lid",
+      "Flip-top straw"
+    ]
+  },
+  {
+    "_id": "el01a01e",
+    "name": "Wireless Noise Cancelling Headphones",
+    "category": "Electronics",
+    "price": 3500,
+    "offerPrice": 2200,
+    "inStock": true,
+    "image": [
+      "/images/custom_headphones.png"
+    ],
+    "description": [
+      "Immersive sound with active noise cancellation",
+      "Up to 30 hours of playback",
+      "Soft ear cushions for all-day comfort"
+    ]
+  },
+  {
+    "_id": "el02b02f",
+    "name": "Smart LED TV 42\"",
+    "category": "Electronics",
+    "price": 60000,
+    "offerPrice": 54999,
+    "inStock": true,
+    "image": [
+      "/images/custom_tv_42.png"
+    ],
+    "description": [
+      "Full HD display with vivid colors",
+      "Built-in streaming apps and smart remote",
+      "Slim bezel design for modern rooms"
+    ]
+  },
+  {
+    "_id": "el03c03g",
+    "name": "Bluetooth Portable Speaker",
+    "category": "Electronics",
+    "price": 1850,
+    "offerPrice": 1350,
+    "inStock": true,
+    "image": [
+      "/images/custom_speaker.png"
+    ],
+    "description": [
+      "Rich stereo sound with bass boost",
+      "Water resistant for outdoor use",
+      "12-hour battery life on a single charge"
+    ]
+  },
+  {
+    "_id": "el04d04h",
+    "name": "Gaming Laptop 16GB RAM",
+    "category": "Electronics",
+    "price": 135000,
+    "offerPrice": 117000,
+    "inStock": true,
+    "image": [
+      "/images/custom_gaming_laptop.png"
+    ],
+    "description": [
+      "High-performance processor for gaming",
+      "Fast SSD storage and crisp display",
+      "RGB keyboard and advanced cooling"
+    ]
+  },
+  {
+    "_id": "el05e05i",
+    "name": "Smartphone 128GB",
+    "category": "Electronics",
+    "price": 39999,
+    "offerPrice": 34999,
+    "inStock": true,
+    "image": [
+      "/images/custom_smartphone_128gb.png"
+    ],
+    "description": [
+      "Crystal-clear display and fast performance",
+      "Dual camera system for sharp photos",
+      "Long-lasting battery and fast charging"
+    ]
+  }
+]

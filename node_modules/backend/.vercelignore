@@ -1,0 +1,12 @@
+node_modules
+.env
+*.log
+uploads
+debug-*.js
+test-*.js
+test-*.mjs
+tmp-*.js
+validate-email-module.mjs
+seed.js
+.nodemonignore
+NUL

@@ -1,0 +1,5 @@
+# Ignore temp wildcard test files that can be locked on Windows
+backend/temp_wildcard_test.mjs
+backend/temp_*.mjs
+Backend/temp_wildcard_test.mjs
+Backend/temp_*.mjs

@@ -1,0 +1,19 @@
+{
+  "name": "gocart",
+  "private": true,
+  "workspaces": [
+    "Backend",
+    "Frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace=Backend",
+    "dev:frontend": "npm run dev --workspace=Frontend"
+  },
+  "dependencies": {
+    "kro": "^1.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

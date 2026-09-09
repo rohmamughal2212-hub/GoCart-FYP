@@ -1,0 +1,969 @@
+{
+  "users": [
+    {
+      "_id": "1",
+      "name": "Ruhma Mughal",
+      "email": "ruhmaproxy@gmail.com",
+      "password": "$2b$10$YGg7xE.z5lWNRbc/QNzwueMgNTOKuVPZe5geG09JqjsXbb6hkOpRW",
+      "phone": "",
+      "profileImage": "",
+      "cartItems": {},
+      "wishlist": [],
+      "isVerified": true
+    },
+    {
+      "_id": "9",
+      "name": "Dr Ruhma",
+      "email": "awais.qarni7886@gmail.com",
+      "password": "$2b$10$lO4HEZVEfTGvsMo0gNhMbe/Pqza09KMVxDIGv8ECQbiHQ.fGrpJjS",
+      "phone": "",
+      "profileImage": "",
+      "cartItems": {},
+      "wishlist": [],
+      "resetPasswordToken": "de8f6ee7d611fecba1bc3dda721944bfd0f0e440b5339d62e24b3ba55e45e3b7",
+      "resetPasswordExpire": "2026-09-06T12:28:34.234Z",
+      "isVerified": true
+    }
+  ],
+  "products": [
+    {
+      "name": "Basmati Rice 1kg",
+      "category": "Grocery",
+      "price": 1234,
+      "offerPrice": 1111,
+      "inStock": true,
+      "image": [
+        "/images/basmati-rice-1kg.png"
+      ],
+      "description": [
+        "Premium long grain",
+        "Ideal for biryani",
+        "Aromatic basmati rice"
+      ],
+      "_id": "38080311d9a4718c081b6a73",
+      "stock": 5,
+      "updatedAt": "2026-09-08T12:42:02.730Z"
+    },
+    {
+      "name": "Chicken Drumsticks 500g",
+      "category": "Meat",
+      "price": 599,
+      "offerPrice": 499,
+      "inStock": true,
+      "image": [
+        "/images/chicken-drumsticks-500g.png"
+      ],
+      "description": [
+        "Fresh farm chicken",
+        "Juicy and tender",
+        "Perfect for grilling"
+      ],
+      "_id": "c4de50b05b725fb49a77bea9",
+      "stock": 5
+    },
+    {
+      "name": "Glow Face Wash 200ml",
+      "category": "Beauty",
+      "price": 740,
+      "offerPrice": 670,
+      "inStock": true,
+      "image": [
+        "/images/glow-face-wash-200ml.png"
+      ],
+      "description": [
+        "Brightening formula",
+        "Gentle daily cleanser",
+        "Leaves skin refreshed"
+      ],
+      "_id": "027bf21dd4001b75e831ee0e",
+      "stock": 4
+    },
+    {
+      "name": "Non-Stick Frying Pan 28cm",
+      "category": "Kitchen",
+      "price": 2999,
+      "offerPrice": 2350,
+      "inStock": true,
+      "image": [
+        "/images/non-stick-frying-pan-28cm.png"
+      ],
+      "description": [
+        "Premium non-stick coating",
+        "28cm diameter",
+        "Easy to clean"
+      ],
+      "_id": "f2e7226863498425a44de874",
+      "stock": 3
+    },
+    {
+      "name": "Striped Polo Shirt",
+      "category": "Garments",
+      "price": 1950,
+      "offerPrice": 1333,
+      "inStock": false,
+      "image": [
+        "/images/striped-polo-shirt.png"
+      ],
+      "description": [
+        "Classic polo collar",
+        "Soft cotton blend",
+        "Smart casual style"
+      ],
+      "_id": "06ed5d3c9058ae2e017cf92e",
+      "stock": 0,
+      "updatedAt": "2026-09-08T12:55:13.630Z"
+    },
+    {
+      "name": "Women's Slim Fit Jeans",
+      "category": "Garments",
+      "price": 4999,
+      "offerPrice": 4400,
+      "inStock": false,
+      "image": [
+        "/images/womens-slim-fit-jeans.png"
+      ],
+      "description": [
+        "Stretchy denim fabric",
+        "Slim silhouette",
+        "Comfortable everyday wear"
+      ],
+      "_id": "adc8f25a9af77bd502088444",
+      "stock": 0,
+      "updatedAt": "2026-09-08T12:55:13.625Z"
+    },
+    {
+      "name": "Casual Hooded Sweatshirt",
+      "category": "Garments",
+      "price": 6300,
+      "offerPrice": 5220,
+      "inStock": true,
+      "image": [
+        "/images/casual-hooded-sweatshirt.png"
+      ],
+      "description": [
+        "Soft fleece lining",
+        "Adjustable hood",
+        "Relaxed fit"
+      ],
+      "_id": "bba52996c780b1e4f58a235a"
+    },
+    {
+      "name": "Floral Maxi Dress",
+      "category": "Garments",
+      "price": 9999,
+      "offerPrice": 6800,
+      "inStock": true,
+      "image": [
+        "/images/floral-maxi-dress.png"
+      ],
+      "description": [
+        "Lightweight floral print",
+        "Floor-length style",
+        "Comfortable summer wear"
+      ],
+      "_id": "2b148c979f49e62a912f3b93",
+      "stock": 5,
+      "updatedAt": "2026-09-09T08:20:29.617Z"
+    },
+    {
+      "name": "Chambray Button-Down Shirt",
+      "category": "Garments",
+      "price": 1975,
+      "offerPrice": 1499,
+      "inStock": true,
+      "image": [
+        "/images/chambray-button-down-shirt.png"
+      ],
+      "description": [
+        "Soft chambray fabric",
+        "Button-down collar",
+        "Perfect for layered outfits"
+      ],
+      "_id": "d6cbbfdfc8a1581fdc0734ab"
+    },
+    {
+      "name": "Soft Baby Blanket",
+      "category": "Baby Items",
+      "price": 2600,
+      "offerPrice": 2099,
+      "inStock": true,
+      "image": [
+        "/images/soft-baby-blanket.png"
+      ],
+      "description": [
+        "Anti-slip surface",
+        "Extra thick 6mm",
+        "Includes carry strap"
+      ],
+      "_id": "67537f6c2828bed9c8a959c5",
+      "stock": 2
+    },
+    {
+      "name": "Fresh Chicken 1kg",
+      "category": "Grocery",
+      "price": 430,
+      "offerPrice": 390,
+      "inStock": true,
+      "image": [
+        "/images/fresh-chicken-1kg.png"
+      ],
+      "description": [
+        "Farm fresh",
+        "Cleaned and packed",
+        "Ready for cooking"
+      ],
+      "_id": "07346af39cdf641277311b9d"
+    },
+    {
+      "name": "Beef Steak 1kg",
+      "category": "Meat",
+      "price": 2350,
+      "offerPrice": 1999,
+      "inStock": true,
+      "image": [
+        "/images/beef-steak-1kg.png"
+      ],
+      "description": [
+        "Premium beef steak",
+        "Rich in flavor",
+        "Cook to preferred doneness"
+      ],
+      "_id": "7072d42efe0ee786de2687f7"
+    },
+    {
+      "name": "Silk Lipstick Set",
+      "category": "Beauty",
+      "price": 1399,
+      "offerPrice": 1199,
+      "inStock": true,
+      "image": [
+        "/images/silk-lipstick-set.png"
+      ],
+      "description": [
+        "Long-lasting color",
+        "Smooth satin finish",
+        "Includes 3 shades"
+      ],
+      "_id": "82a13ac321bec392309dcff2",
+      "stock": 7
+    },
+    {
+      "name": "Stainless Steel Cookware Set",
+      "category": "Kitchen",
+      "price": 7700,
+      "offerPrice": 6500,
+      "inStock": true,
+      "image": [
+        "/images/stainless-steel-cookware-set.png"
+      ],
+      "description": [
+        "Durable stainless steel",
+        "Includes 5 pieces",
+        "Oven safe"
+      ],
+      "_id": "e5af59f132373fc7e39fa39e"
+    },
+    {
+      "name": "Organic Baby Lotion",
+      "category": "Baby Items",
+      "price": 699,
+      "offerPrice": 599,
+      "inStock": true,
+      "image": [
+        "/images/organic-baby-lotion.png"
+      ],
+      "description": [
+        "Cast iron with rubber grip",
+        "Quick-adjust mechanism",
+        "10 weight settings"
+      ],
+      "_id": "a3ce031c8975cfa5a7049cbb",
+      "stock": 10,
+      "updatedAt": "2026-09-08T12:43:31.415Z"
+    },
+    {
+      "name": "Fresh Milk 1L",
+      "category": "Grocery",
+      "price": 399,
+      "offerPrice": 350,
+      "inStock": true,
+      "image": [
+        "/images/fresh-milk-1l.png"
+      ],
+      "description": [
+        "Full cream milk",
+        "Pasteurised",
+        "Rich in calcium"
+      ],
+      "_id": "9889da946caea345f383902d"
+    },
+    {
+      "name": "Fresh Fish 1kg",
+      "category": "Meat",
+      "price": 1250,
+      "offerPrice": 899,
+      "inStock": true,
+      "image": [
+        "/images/fresh-fish-1kg.png"
+      ],
+      "description": [
+        "Ocean-fresh fish",
+        "Rich in protein",
+        "Great for pan-frying"
+      ],
+      "_id": "ddee1175cebbf511764d9e89"
+    },
+    {
+      "name": "Rose Perfume Spray 50ml",
+      "category": "Beauty",
+      "price": 1750,
+      "offerPrice": 1499,
+      "inStock": true,
+      "image": [
+        "/images/rose-perfume-spray-50ml.png"
+      ],
+      "description": [
+        "Fresh floral scent",
+        "Fine mist spray",
+        "Lasts all day"
+      ],
+      "_id": "4f8ada4e58347cb932daccc6",
+      "stock": 10,
+      "updatedAt": "2026-09-08T13:06:27.113Z"
+    },
+    {
+      "name": "Electric Kettle 1.7L",
+      "category": "Kitchen",
+      "price": 1999,
+      "offerPrice": 1640,
+      "inStock": true,
+      "image": [
+        "/images/electric-kettle-1.7l.png"
+      ],
+      "description": [
+        "Rapid boil technology",
+        "1.7-litre capacity",
+        "Auto shut-off"
+      ],
+      "_id": "de0ba427d533a435189306b2"
+    },
+    {
+      "name": "Baby Stroller",
+      "category": "Baby Items",
+      "price": 8300,
+      "offerPrice": 6900,
+      "inStock": true,
+      "image": [
+        "/images/baby-stroller.png"
+      ],
+      "description": [
+        "In-mould EPS liner",
+        "12 ventilation channels",
+        "Adjustable fit system"
+      ],
+      "_id": "a8bc494a481e0cd2c1abc626"
+    },
+    {
+      "name": "Cooking Oil 1L",
+      "category": "Grocery",
+      "price": 640,
+      "offerPrice": 615,
+      "inStock": true,
+      "image": [
+        "/images/cooking-oil-1l.png"
+      ],
+      "description": [
+        "Refined cooking oil",
+        "Suitable for frying",
+        "1 litre bottle"
+      ],
+      "_id": "3909ef01e08a40c77dcac26e"
+    },
+    {
+      "name": "Chicken Sausages 500g",
+      "category": "Meat",
+      "price": 1500,
+      "offerPrice": 1299,
+      "inStock": true,
+      "image": [
+        "/images/Chicken-Sausages-500g.png"
+      ],
+      "description": [
+        "Smoked chicken sausages",
+        "Ready to cook",
+        "Perfect for breakfast"
+      ],
+      "_id": "0b46842b043467e73ce1a0c6"
+    },
+    {
+      "name": "Keratin Hair Serum 100ml",
+      "category": "Beauty",
+      "price": 1580,
+      "offerPrice": 1370,
+      "inStock": false,
+      "image": [
+        "/images/keratin-hair-serum-100ml.png"
+      ],
+      "description": [
+        "Smoothens frizz",
+        "Adds shine",
+        "Easy application"
+      ],
+      "_id": "fd48714eaf296b01d2325fef",
+      "stock": 0,
+      "updatedAt": "2026-09-08T13:29:41.268Z"
+    },
+    {
+      "name": "Ceramic Dinner Plate Set",
+      "category": "Kitchen",
+      "price": 3750,
+      "offerPrice": 3200,
+      "inStock": true,
+      "image": [
+        "/images/ceramic-dinner-plate-set.png"
+      ],
+      "description": [
+        "6-piece plate set",
+        "Elegant ceramic finish",
+        "Dishwasher safe"
+      ],
+      "_id": "c54b25ebee6d27ce10bf04e8"
+    },
+    {
+      "name": "Baby Diaper Pack",
+      "category": "Baby Items",
+      "price": 1280,
+      "offerPrice": 1150,
+      "inStock": true,
+      "image": [
+        "/images/baby-diaper-pack.png"
+      ],
+      "description": [
+        "2 rackets + 3 shuttlecocks",
+        "Aluminium frame",
+        "Includes carry bag"
+      ],
+      "_id": "e2170270a93700180c29f625"
+    },
+    {
+      "name": "Whole Wheat Flour 1kg",
+      "category": "Grocery",
+      "price": 310,
+      "offerPrice": 250,
+      "inStock": true,
+      "image": [
+        "/images/whole-wheat-flour-1kg.png"
+      ],
+      "description": [
+        "Atta",
+        "Stone ground",
+        "1 kilogram pack"
+      ],
+      "_id": "54642996fe6a1fef1919edae"
+    },
+    {
+      "name": "Eggs Dozen",
+      "category": "Grocery",
+      "price": 250,
+      "offerPrice": 199,
+      "inStock": true,
+      "image": [
+        "/images/eggs-dozen.png"
+      ],
+      "description": [
+        "Farm fresh eggs",
+        "12-pack",
+        "Rich in protein"
+      ],
+      "_id": "5ababd25469ced5e9a77d9d7"
+    },
+    {
+      "name": "Vitamin C Facial Cleanser 150ml",
+      "category": "Beauty",
+      "price": 635,
+      "offerPrice": 580,
+      "inStock": true,
+      "image": [
+        "/images/vitamin-c-facial-cleanser-150ml.png"
+      ],
+      "description": [
+        "Brightens skin tone",
+        "Gentle foaming cleanser",
+        "Packed with vitamin C"
+      ],
+      "_id": "2e6f3704fac121bdea761e63"
+    },
+    {
+      "name": "Premium Kitchen Knife Set",
+      "category": "Kitchen",
+      "price": 1750,
+      "offerPrice": 1299,
+      "inStock": true,
+      "image": [
+        "/images/premium-kitchen-knife-set.png"
+      ],
+      "description": [
+        "5-piece knife collection",
+        "High-carbon steel",
+        "Comfort grip handles"
+      ],
+      "_id": "a957f0eaeb62c906c7fdad60"
+    },
+    {
+      "name": "Baby Feeding Bottle",
+      "category": "Baby Items",
+      "price": 1650,
+      "offerPrice": 1300,
+      "inStock": true,
+      "image": [
+        "/images/baby-feeding-bottle.png"
+      ],
+      "description": [
+        "BPA-free Tritan plastic",
+        "Leak-proof lid",
+        "Flip-top straw"
+      ],
+      "_id": "4b5c3bf95ea264e73033a093"
+    },
+    {
+      "_id": "el01a01e",
+      "name": "Wireless Noise Cancelling Headphones",
+      "category": "Electronics",
+      "price": 3500,
+      "offerPrice": 2200,
+      "inStock": true,
+      "image": [
+        "/images/custom_headphones.png"
+      ],
+      "description": [
+        "Immersive sound with active noise cancellation",
+        "Up to 30 hours of playback",
+        "Soft ear cushions for all-day comfort"
+      ]
+    },
+    {
+      "_id": "el02b02f",
+      "name": "Smart LED TV 42\"",
+      "category": "Electronics",
+      "price": 60000,
+      "offerPrice": 54999,
+      "inStock": true,
+      "image": [
+        "/images/custom_tv_42.png"
+      ],
+      "description": [
+        "Full HD display with vivid colors",
+        "Built-in streaming apps and smart remote",
+        "Slim bezel design for modern rooms"
+      ]
+    },
+    {
+      "_id": "el03c03g",
+      "name": "Bluetooth Portable Speaker",
+      "category": "Electronics",
+      "price": 1850,
+      "offerPrice": 1350,
+      "inStock": true,
+      "image": [
+        "/images/custom_speaker.png"
+      ],
+      "description": [
+        "Rich stereo sound with bass boost",
+        "Water resistant for outdoor use",
+        "12-hour battery life on a single charge"
+      ]
+    },
+    {
+      "_id": "el04d04h",
+      "name": "Gaming Laptop 16GB RAM",
+      "category": "Electronics",
+      "price": 135000,
+      "offerPrice": 117000,
+      "inStock": true,
+      "image": [
+        "/images/custom_gaming_laptop.png"
+      ],
+      "description": [
+        "High-performance processor for gaming",
+        "Fast SSD storage and crisp display",
+        "RGB keyboard and advanced cooling"
+      ]
+    },
+    {
+      "_id": "el05e05i",
+      "name": "Smartphone 128GB",
+      "category": "Electronics",
+      "price": 39999,
+      "offerPrice": 34999,
+      "inStock": true,
+      "image": [
+        "/images/custom_smartphone_128gb.png"
+      ],
+      "description": [
+        "Crystal-clear display and fast performance",
+        "Dual camera system for sharp photos",
+        "Long-lasting battery and fast charging"
+      ]
+    },
+    {
+      "_id": "gd46g23h",
+      "name": "Potato 500g",
+      "category": "Vegetables",
+      "price": 25,
+      "offerPrice": 20,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "gd47g34h",
+      "name": "Tomato 1 kg",
+      "category": "Vegetables",
+      "price": 40,
+      "offerPrice": 35,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "gd48g45h",
+      "name": "Carrot 500g",
+      "category": "Vegetables",
+      "price": 30,
+      "offerPrice": 28,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "gd49g56h",
+      "name": "Spinach 500g",
+      "category": "Vegetables",
+      "price": 18,
+      "offerPrice": 15,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "gd50g67h",
+      "name": "Onion 500g",
+      "category": "Vegetables",
+      "price": 22,
+      "offerPrice": 19,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek52j23k",
+      "name": "Orange 1 kg",
+      "category": "Fruits",
+      "price": 80,
+      "offerPrice": 75,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek53j34k",
+      "name": "Banana 1 kg",
+      "category": "Fruits",
+      "price": 50,
+      "offerPrice": 45,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek54j45k",
+      "name": "Mango 1 kg",
+      "category": "Fruits",
+      "price": 150,
+      "offerPrice": 140,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek55j56k",
+      "name": "Grapes 500g",
+      "category": "Fruits",
+      "price": 70,
+      "offerPrice": 65,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek57j78k",
+      "name": "Paneer 200g",
+      "category": "Dairy",
+      "price": 90,
+      "offerPrice": 85,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek58j89k",
+      "name": "Eggs 12 pcs",
+      "category": "Dairy",
+      "price": 90,
+      "offerPrice": 85,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek59j90k",
+      "name": "Paneer 200g",
+      "category": "Dairy",
+      "price": 90,
+      "offerPrice": 85,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek60j01k",
+      "name": "Cheese 200g",
+      "category": "Dairy",
+      "price": 140,
+      "offerPrice": 130,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek62j23k",
+      "name": "Pepsi 1.5L",
+      "category": "Drinks",
+      "price": 78,
+      "offerPrice": 73,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek63j34k",
+      "name": "Sprite 1.5L",
+      "category": "Drinks",
+      "price": 79,
+      "offerPrice": 74,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek64j45k",
+      "name": "Fanta 1.5L",
+      "category": "Drinks",
+      "price": 77,
+      "offerPrice": 72,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek65j56k",
+      "name": "7 Up 1.5L",
+      "category": "Drinks",
+      "price": 76,
+      "offerPrice": 71,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek67j78k",
+      "name": "Wheat Flour 5kg",
+      "category": "Grains",
+      "price": 250,
+      "offerPrice": 230,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek68j89k",
+      "name": "Organic Quinoa 500g",
+      "category": "Grains",
+      "price": 450,
+      "offerPrice": 420,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek69j90k",
+      "name": "Brown Rice 1kg",
+      "category": "Grains",
+      "price": 120,
+      "offerPrice": 110,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "ek70j01k",
+      "name": "Barley 1kg",
+      "category": "Grains",
+      "price": 150,
+      "offerPrice": 140,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "sp02b98k",
+      "name": "Adjustable Dumbbell Set 20kg",
+      "category": "Sports",
+      "price": 5999,
+      "offerPrice": 4299,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "sp03c97k",
+      "name": "Cycling Helmet",
+      "category": "Sports",
+      "price": 2999,
+      "offerPrice": 1999,
+      "inStock": true,
+      "image": [],
+      "description": [],
+      "stock": 7,
+      "updatedAt": "2026-09-09T08:20:44.208Z"
+    },
+    {
+      "_id": "sp04d96k",
+      "name": "Badminton Racket Set",
+      "category": "Sports",
+      "price": 1499,
+      "offerPrice": 999,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "sp05e95k",
+      "name": "Running Water Bottle 750ml",
+      "category": "Sports",
+      "price": 699,
+      "offerPrice": 499,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "bk02b30y",
+      "name": "Butter Croissant 100g",
+      "category": "Bakery",
+      "price": 50,
+      "offerPrice": 45,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "bk03c31x",
+      "name": "Chocolate Cake 500g",
+      "category": "Bakery",
+      "price": 350,
+      "offerPrice": 325,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "bk04d32w",
+      "name": "Whole Bread 400g",
+      "category": "Bakery",
+      "price": 45,
+      "offerPrice": 40,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "bk05e33v",
+      "name": "Vanilla Muffins 6 pcs",
+      "category": "Bakery",
+      "price": 100,
+      "offerPrice": 90,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "in02g26t",
+      "name": "Top Ramen 270g",
+      "category": "Instant",
+      "price": 45,
+      "offerPrice": 40,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "in03h27s",
+      "name": "Knorr Cup Soup 70g",
+      "category": "Instant",
+      "price": 35,
+      "offerPrice": 30,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "in04i28r",
+      "name": "Yippee Noodles 260g",
+      "category": "Instant",
+      "price": 50,
+      "offerPrice": 45,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "in05j29q",
+      "name": "Oats Noodles 72g",
+      "category": "Instant",
+      "price": 40,
+      "offerPrice": 35,
+      "inStock": true,
+      "image": [],
+      "description": []
+    },
+    {
+      "_id": "sp01a99k",
+      "name": "Yoga Mat 6mm",
+      "category": "Sports",
+      "price": 1499,
+      "offerPrice": 999,
+      "inStock": true,
+      "image": [
+        "/images/custom_yoga_mat.png"
+      ],
+      "description": []
+    }
+  ],
+  "orders": [],
+  "addresses": [
+    {
+      "_id": "2",
+      "userId": "1",
+      "firstName": "Ruhma",
+      "lastName": "Mughal",
+      "email": "ruhmaproxy@gmail.com",
+      "street": "19 B U1",
+      "city": "Gujranwala",
+      "state": "Pakistan",
+      "zipCode": 50250,
+      "country": "Pakistan",
+      "phone": "1234567890"
+    }
+  ]
+}

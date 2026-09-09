@@ -1,0 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+@import "tailwindcss";
+
+* {
+  font-family: "Outfit", sans-serif;
+}
+
+/* ── GoCart Brand Theme ──────────────────────────────────────────────────
+   Remaps Tailwind's "indigo" scale to GoCart's navy palette so every
+   existing  indigo-*  class in the app automatically renders in-brand.
+   Primary (#1B3A6B) is the dark navy from the GoCart cart icon + "G".
+────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-primary:     #1B3A6B;
+
+  /* indigo scale → GoCart navy scale */
+  --color-indigo-50:   #f0f5fb;
+  --color-indigo-100:  #d6e4f5;
+  --color-indigo-200:  #adc9eb;
+  --color-indigo-300:  #7faedd;
+  --color-indigo-400:  #4f8dcb;
+  --color-indigo-500:  #1B3A6B;   /* ← primary brand navy */
+  --color-indigo-600:  #162f57;
+  --color-indigo-700:  #102340;
+  --color-indigo-800:  #0b182c;
+  --color-indigo-900:  #060e1a;
+}

@@ -1,0 +1,3 @@
+# Ignore local temp wildcard test files that may be created by tools
+temp_wildcard_test.mjs
+temp_*.mjs
