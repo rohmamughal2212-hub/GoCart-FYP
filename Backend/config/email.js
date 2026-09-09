@@ -125,7 +125,7 @@ const createSmtpTransporter = async () => {
 };
 
 const createTransporter = async () => {
-  if (emailProvider === "sendgrid" || sendgridApiKey || sendgridPass) {
+  if ((emailProvider === "sendgrid" || sendgridApiKey || sendgridPass) && (sendgridApiKey || sendgridPass)) {
     return { transporter: await createSendGridTransporter(), type: "SENDGRID" };
   }
 
