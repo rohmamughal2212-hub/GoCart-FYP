@@ -34,6 +34,7 @@ const allowedOrigins = [
   "http://127.0.0.1:5000",
   "https://grocery-fyp.vercel.app",
   "https://gocart-co.vercel.app",
+  "https://gocart-fyp.vercel.app",
   process.env.FRONTEND_URL,
 ]
   .filter(Boolean)
