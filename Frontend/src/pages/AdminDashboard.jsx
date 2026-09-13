@@ -166,24 +166,27 @@ const AdminDashboard = () => {
   });
   const [imagePreview, setImagePreview] = useState(null);
 
-  const fetchStats = async () => {
+  const fetchStats = async (ordersData = null) => {
     try {
       setLoading(true);
       const res = await axios.get("/api/admin/stats");
+
+      // Use provided ordersData or fall back to state orders
+      const ordersToUse = ordersData !== null ? ordersData : orders;
 
       // Calculate order status counts
       let pendingToday = 0, pendingYesterday = 0, pendingMonth = 0;
       let confirmedToday = 0, confirmedYesterday = 0, confirmedMonth = 0;
       let deliveredToday = 0, deliveredYesterday = 0, deliveredMonth = 0;
 
-      if (orders && orders.length > 0) {
+      if (ordersToUse && ordersToUse.length > 0) {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        orders.forEach(order => {
+        ordersToUse.forEach(order => {
           const orderDate = order.createdAt ? new Date(order.createdAt) : new Date();
           const orderDateOnly = new Date(orderDate.getFullYear(), orderDate.getMonth(), orderDate.getDate());
           const status = (order.status || "pending").toLowerCase();
@@ -250,6 +253,18 @@ const AdminDashboard = () => {
     }
   };
 
+  // Initial load: Fetch orders and stats on component mount for dashboard
+  useEffect(() => {
+    const initializeDashboard = async () => {
+      try {
+        await fetchOrders(); // This will fetch orders AND call fetchStats internally
+      } catch (error) {
+        console.error("Failed to initialize dashboard:", error);
+      }
+    };
+    initializeDashboard();
+  }, []);
+
   useEffect(() => {
     if (activeView === "users") fetchUsers();
     if (activeView === "orders" || activeView === "receipts") fetchOrders();
@@ -266,20 +281,25 @@ const AdminDashboard = () => {
     setProductCategories(Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0])));
   }, [products]);
 
-  // Poll stats while dashboard or orders view active
+  // Poll stats while dashboard or orders view active - AFTER initial load
   useEffect(() => {
     if (activeView !== "dashboard" && activeView !== "orders") return;
-    const id = setInterval(() => fetchStats(), 8000);
+    const id = setInterval(() => fetchStats(), 5000); // Poll every 5 seconds for live updates
     return () => clearInterval(id);
   }, [activeView]);
 
   const fetchOrders = async () => {
     try {
       const { data } = await axios.get("/api/admin/orders");
-      if (data?.success) setOrders(data.orders || []);
-      else setOrders(data?.orders || []);
-      // update stats after loading orders
-      fetchStats();
+      const ordersData = data?.success ? (data.orders || []) : (data?.orders || []);
+
+      console.log("📦 Fetched orders:", ordersData.length, "orders -", ordersData);
+
+      // Update state with new orders
+      setOrders(ordersData);
+
+      // Calculate stats using the newly fetched orders data
+      await fetchStats(ordersData);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
       toast.error("Failed to load orders");
@@ -462,6 +482,32 @@ const AdminDashboard = () => {
   const handleCreateProduct = async (e) => {
     e && e.preventDefault && e.preventDefault();
     try {
+      // Validate required fields
+      if (!newProduct.name || !newProduct.name.trim()) {
+        toast.error("Product name is required");
+        return;
+      }
+      if (!newProduct.description || !newProduct.description.trim()) {
+        toast.error("Product description is required");
+        return;
+      }
+      if (!newProduct.category || !newProduct.category.trim()) {
+        toast.error("Product category is required");
+        return;
+      }
+      if (!newProduct.price || Number(newProduct.price) <= 0) {
+        toast.error("Product price must be greater than 0");
+        return;
+      }
+      if (!newProduct.offerPrice || Number(newProduct.offerPrice) <= 0) {
+        toast.error("Offer price must be greater than 0");
+        return;
+      }
+      if (!newProduct.images || newProduct.images.length === 0) {
+        toast.error("At least one product image is required");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("name", newProduct.name);
       formData.append("description", newProduct.description);
@@ -660,6 +706,258 @@ const AdminDashboard = () => {
                 </div>
                 <span className="hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 sm:block">Live data</span>
               </div>
+
+              {/* Revenue Overview Graph + Top Products - Two Column Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {/* Revenue Overview Graph - LEFT SIDE (60%) */}
+                <div className="lg:col-span-2">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">Revenue Overview</h2>
+                  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm overflow-y-auto max-h-[700px]">
+                    {(() => {
+                      // Calculate revenue for LAST 3 MONTHS ONLY (auto-updating)
+                      const monthlyRevenue = {};
+                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      const now = new Date();
+
+                      // Initialize LAST 3 MONTHS with 0
+                      for (let i = 2; i >= 0; i--) {
+                        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                        const key = `${date.getFullYear()}-${date.getMonth()}`;
+                        monthlyRevenue[key] = 0;
+                      }
+
+                      // Calculate revenue from orders - REAL DATA
+                      if (Array.isArray(orders) && orders.length > 0) {
+                        orders.forEach(order => {
+                          const orderDate = new Date(order.createdAt);
+                          const key = `${orderDate.getFullYear()}-${orderDate.getMonth()}`;
+                          const amount = Number(order.total || order.amount || 0);
+                          if (monthlyRevenue.hasOwnProperty(key)) {
+                            monthlyRevenue[key] += amount;
+                          }
+                        });
+                      }
+
+                      const revenues = Object.keys(monthlyRevenue).map(key => monthlyRevenue[key]);
+                      const maxRevenue = Math.max(...revenues, 10000);
+                      const months = Object.keys(monthlyRevenue).map(key => {
+                        const [year, month] = key.split('-');
+                        return monthNames[parseInt(month)];
+                      });
+
+                      // Generate SVG coordinates with smooth curves
+                      const padding = 50;
+                      const chartWidth = 600;
+                      const chartHeight = 250;
+                      const chartBaseY = 280;
+                      const spacing = chartWidth / (revenues.length - 1 || 1);
+
+                      const points = revenues.map((rev, idx) => ({
+                        x: padding + (idx * spacing),
+                        y: chartBaseY - ((rev / maxRevenue) * chartHeight),
+                        revenue: rev,
+                        month: months[idx]
+                      }));
+
+                      // Generate smooth curve path using Bezier curves
+                      const generateSmoothPath = (points) => {
+                        if (points.length < 2) return '';
+                        let path = `M ${points[0].x} ${points[0].y}`;
+
+                        for (let i = 0; i < points.length - 1; i++) {
+                          const curr = points[i];
+                          const next = points[i + 1];
+                          const cp1x = curr.x + (next.x - curr.x) / 2;
+                          const cp1y = curr.y;
+                          const cp2x = curr.x + (next.x - curr.x) / 2;
+                          const cp2y = next.y;
+                          path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${next.x} ${next.y}`;
+                        }
+                        return path;
+                      };
+
+                      const linePath = generateSmoothPath(points);
+
+                      // Generate area path for fill
+                      const generateSmoothArea = (points) => {
+                        if (points.length < 2) return '';
+                        let path = `M ${points[0].x} ${points[0].y}`;
+
+                        for (let i = 0; i < points.length - 1; i++) {
+                          const curr = points[i];
+                          const next = points[i + 1];
+                          const cp1x = curr.x + (next.x - curr.x) / 2;
+                          const cp1y = curr.y;
+                          const cp2x = curr.x + (next.x - curr.x) / 2;
+                          const cp2y = next.y;
+                          path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${next.x} ${next.y}`;
+                        }
+
+                        path += ` L ${points[points.length - 1].x} 280`;
+                        for (let i = points.length - 2; i >= 0; i--) {
+                          path += ` L ${points[i].x} 280`;
+                        }
+                        path += ` Z`;
+                        return path;
+                      };
+
+                      const areaPath = generateSmoothArea(points);
+
+                      return (
+                        <div className="w-full h-96">
+                          <svg width="100%" height="100%" viewBox="0 0 700 310" className="overflow-visible" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                              <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style={{ stopColor: '#2d72d9', stopOpacity: 0.3 }} />
+                                <stop offset="100%" style={{ stopColor: '#2d72d9', stopOpacity: 0.05 }} />
+                              </linearGradient>
+                            </defs>
+
+                            {/* Y-axis */}
+                            <line x1="40" y1="5" x2="40" y2="280" stroke="#64748b" strokeWidth="3" />
+                            {/* X-axis */}
+                            <line x1="40" y1="280" x2="680" y2="280" stroke="#64748b" strokeWidth="3" />
+
+                            {/* Calculate evenly spaced Y-axis labels and grid lines */}
+                            {(() => {
+                              const yAxisLevels = [
+                                { value: 0, yPos: 280 },
+                                { value: maxRevenue / 4, yPos: 280 - (250 / 4) },
+                                { value: maxRevenue / 2, yPos: 280 - (250 / 2) },
+                                { value: (maxRevenue * 3) / 4, yPos: 280 - (250 * 3 / 4) },
+                                { value: maxRevenue, yPos: 280 - 250 }
+                              ];
+                              return (
+                                <>
+                                  {/* Grid lines and labels */}
+                                  {yAxisLevels.map((level, idx) => (
+                                    <g key={`y-axis-${idx}`}>
+                                      {idx !== 0 && (
+                                        <line x1="40" y1={level.yPos} x2="680" y2={level.yPos} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4,4" />
+                                      )}
+                                      <text x="35" y={level.yPos + 3.5} fontSize="13" fontWeight="600" fill="#334155" textAnchor="end">
+                                        ₨{(level.value / 1000).toFixed(0)}K
+                                      </text>
+                                    </g>
+                                  ))}
+                                </>
+                              );
+                            })()}
+
+                            {/* Smooth area fill */}
+                            <path d={areaPath} fill="url(#areaGradient)" />
+
+                            {/* Smooth line */}
+                            <path
+                              d={linePath}
+                              fill="none"
+                              stroke="#2d72d9"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+
+                            {/* Data points with values */}
+                            {points.map((point, idx) => (
+                              <g key={idx}>
+                                <circle cx={point.x} cy={point.y} r="4" fill="#2d72d9" />
+                                <circle cx={point.x} cy={point.y} r="6" fill="none" stroke="#2d72d9" strokeWidth="1.5" opacity="0.3" />
+                                {point.revenue > 0 && (
+                                  <text
+                                    x={point.x}
+                                    y={point.y - 12}
+                                    textAnchor="middle"
+                                    fontSize="12"
+                                    fontWeight="700"
+                                    fill="#0f172a"
+                                  >
+                                    ₨{(point.revenue / 1000).toFixed(1)}K
+                                  </text>
+                                )}
+                                <text
+                                  x={point.x}
+                                  y="300"
+                                  textAnchor="middle"
+                                  fontSize="13"
+                                  fontWeight="600"
+                                  fill="#334155"
+                                >
+                                  {point.month}
+                                </text>
+                              </g>
+                            ))}
+                          </svg>
+                        </div>
+                      );
+                    })()}
+                    <div className="mt-4 text-xs text-slate-600 text-center">
+                      Last 3 Months | Auto-updating with live data
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Selling Products - RIGHT SIDE (40%) */}
+                <div className="lg:col-span-1">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">Top Selling Products</h2>
+                  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                    {products.length === 0 ? (
+                      <p className="text-center text-gray-500 py-8">No products available</p>
+                    ) : (
+                      <div className="space-y-0 divide-y divide-slate-200">
+                        {products
+                          .map((product) => {
+                            const salesCount = orders.reduce((total, order) => {
+                              if (Array.isArray(order.items)) {
+                                return (
+                                  total +
+                                  order.items.reduce((sum, item) => {
+                                    const itemProductId = item.product?._id || item.product?.id || item.productId;
+                                    const productId = product._id || product.id;
+                                    return String(itemProductId) === String(productId) ? sum + (item.quantity || item.qty || 1) : sum;
+                                  }, 0)
+                                );
+                              }
+                              return total;
+                            }, 0);
+                            return { ...product, salesCount };
+                          })
+                          .sort((a, b) => b.salesCount - a.salesCount)
+                          .filter(p => p.salesCount > 0)
+                          .slice(0, 8)
+                          .map((product, idx) => {
+                            const totalPrice = Number(product.offerPrice || product.price || 0) * product.salesCount;
+                            return (
+                              <div key={idx} className="py-3 border-b border-slate-100 last:border-b-0">
+                                <p className="text-sm font-medium text-slate-900">
+                                  {product.name || product.title || "Product"} <span className="text-slate-600">{product.salesCount}x</span> <span className="text-green-600 font-semibold">PKR {totalPrice.toLocaleString()}</span>
+                                </p>
+                              </div>
+                            );
+                          })}
+                        {products.filter(p => {
+                          const salesCount = orders.reduce((total, order) => {
+                            if (Array.isArray(order.items)) {
+                              return (
+                                total +
+                                order.items.reduce((sum, item) => {
+                                  const itemProductId = item.product?._id || item.product?.id || item.productId;
+                                  const productId = p._id || p.id;
+                                  return String(itemProductId) === String(productId) ? sum + (item.quantity || item.qty || 1) : sum;
+                                }, 0)
+                              );
+                            }
+                            return total;
+                          }, 0);
+                          return salesCount > 0;
+                        }).length === 0 && (
+                            <p className="text-center text-gray-500 py-8">No sold products yet</p>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="flex items-start justify-between">
@@ -722,8 +1020,8 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Order Status Cards */}
-              <div className="mt-8">
+              {/* Order Status Breakdown */}
+              <div className="mb-8">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">Order Status Breakdown</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Pending Orders */}
@@ -785,8 +1083,10 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
+              {/* Removed - Now integrated into left-right layout above */}
+
               {/* Low Stock Products */}
-              <div className="mt-8">
+              <div className="mt-4">
                 <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-slate-900"><Icon name="alert" size={20} /> Low Stock Products <span className="text-sm font-medium text-slate-500">(2 or less)</span></h2>
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   {products.filter(p => {
@@ -1144,24 +1444,24 @@ const AdminDashboard = () => {
 
               <div className="md:col-span-2 space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Name</label>
+                  <label className="text-sm font-medium text-gray-700">Name <span className="text-red-500">*</span></label>
                   <input className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2" value={newProduct.name} onChange={(e) => setNewProduct(p => ({ ...p, name: e.target.value }))} required />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Description</label>
-                  <textarea className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 resize-none" rows={5} value={newProduct.description} onChange={(e) => setNewProduct(p => ({ ...p, description: e.target.value }))} />
+                  <label className="text-sm font-medium text-gray-700">Description <span className="text-red-500">*</span></label>
+                  <textarea className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 resize-none" rows={5} value={newProduct.description} onChange={(e) => setNewProduct(p => ({ ...p, description: e.target.value }))} required />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <select className="rounded-lg border border-gray-300 px-3 py-2 cursor-pointer" value={newProduct.category} onChange={(e) => setNewProduct(p => ({ ...p, category: e.target.value }))}>
-                    <option value="">Select Category</option>
+                  <select className="rounded-lg border border-gray-300 px-3 py-2 cursor-pointer" value={newProduct.category} onChange={(e) => setNewProduct(p => ({ ...p, category: e.target.value }))} required>
+                    <option value="">Select Category *</option>
                     {categories.slice(0, 8).map((c, i) => (
                       <option key={i} value={c.path || c.name || c.title}>{c.path || c.name || c.title}</option>
                     ))}
                   </select>
-                  <input placeholder="MRP" type="number" className="rounded-lg border border-gray-300 px-3 py-2" value={newProduct.price} onChange={(e) => setNewProduct(p => ({ ...p, price: e.target.value }))} />
-                  <input placeholder="Offer Price" type="number" className="rounded-lg border border-gray-300 px-3 py-2" value={newProduct.offerPrice} onChange={(e) => setNewProduct(p => ({ ...p, offerPrice: e.target.value }))} />
+                  <input placeholder="MRP *" type="number" className="rounded-lg border border-gray-300 px-3 py-2" value={newProduct.price} onChange={(e) => setNewProduct(p => ({ ...p, price: e.target.value }))} required />
+                  <input placeholder="Offer Price *" type="number" className="rounded-lg border border-gray-300 px-3 py-2" value={newProduct.offerPrice} onChange={(e) => setNewProduct(p => ({ ...p, offerPrice: e.target.value }))} required />
                   <input placeholder="Stock" type="number" className="rounded-lg border border-gray-300 px-3 py-2" value={newProduct.stock} onChange={(e) => setNewProduct(p => ({ ...p, stock: Number(e.target.value) || 0 }))} min="0" />
                 </div>
 

@@ -62,23 +62,6 @@
       "stock": 5
     },
     {
-      "name": "Glow Face Wash 200ml",
-      "category": "Beauty",
-      "price": 740,
-      "offerPrice": 670,
-      "inStock": true,
-      "image": [
-        "/images/glow-face-wash-200ml.png"
-      ],
-      "description": [
-        "Brightening formula",
-        "Gentle daily cleanser",
-        "Leaves skin refreshed"
-      ],
-      "_id": "027bf21dd4001b75e831ee0e",
-      "stock": 4
-    },
-    {
       "name": "Non-Stick Frying Pan 28cm",
       "category": "Kitchen",
       "price": 2999,
@@ -196,7 +179,8 @@
         "Includes carry strap"
       ],
       "_id": "67537f6c2828bed9c8a959c5",
-      "stock": 2
+      "stock": 2,
+      "updatedAt": "2026-09-09T19:49:20.369Z"
     },
     {
       "name": "Fresh Chicken 1kg",
@@ -229,23 +213,6 @@
         "Cook to preferred doneness"
       ],
       "_id": "7072d42efe0ee786de2687f7"
-    },
-    {
-      "name": "Silk Lipstick Set",
-      "category": "Beauty",
-      "price": 1399,
-      "offerPrice": 1199,
-      "inStock": true,
-      "image": [
-        "/images/silk-lipstick-set.png"
-      ],
-      "description": [
-        "Long-lasting color",
-        "Smooth satin finish",
-        "Includes 3 shades"
-      ],
-      "_id": "82a13ac321bec392309dcff2",
-      "stock": 7
     },
     {
       "name": "Stainless Steel Cookware Set",
@@ -314,24 +281,6 @@
       "_id": "ddee1175cebbf511764d9e89"
     },
     {
-      "name": "Rose Perfume Spray 50ml",
-      "category": "Beauty",
-      "price": 1750,
-      "offerPrice": 1499,
-      "inStock": true,
-      "image": [
-        "/images/rose-perfume-spray-50ml.png"
-      ],
-      "description": [
-        "Fresh floral scent",
-        "Fine mist spray",
-        "Lasts all day"
-      ],
-      "_id": "4f8ada4e58347cb932daccc6",
-      "stock": 10,
-      "updatedAt": "2026-09-08T13:06:27.113Z"
-    },
-    {
       "name": "Electric Kettle 1.7L",
       "category": "Kitchen",
       "price": 1999,
@@ -346,24 +295,6 @@
         "Auto shut-off"
       ],
       "_id": "de0ba427d533a435189306b2"
-    },
-    {
-      "name": "Baby Stroller",
-      "category": "Baby Items",
-      "price": 1234,
-      "offerPrice": 999,
-      "inStock": true,
-      "image": [
-        "/images/baby-stroller.png"
-      ],
-      "description": [
-        "In-mould EPS liner",
-        "12 ventilation channels",
-        "Adjustable fit system"
-      ],
-      "_id": "a8bc494a481e0cd2c1abc626",
-      "stock": 7,
-      "updatedAt": "2026-09-09T18:52:13.328Z"
     },
     {
       "name": "Cooking Oil 1L",
@@ -398,24 +329,6 @@
       "_id": "0b46842b043467e73ce1a0c6"
     },
     {
-      "name": "Keratin Hair Serum 100ml",
-      "category": "Beauty",
-      "price": 1580,
-      "offerPrice": 1370,
-      "inStock": false,
-      "image": [
-        "/images/keratin-hair-serum-100ml.png"
-      ],
-      "description": [
-        "Smoothens frizz",
-        "Adds shine",
-        "Easy application"
-      ],
-      "_id": "fd48714eaf296b01d2325fef",
-      "stock": 0,
-      "updatedAt": "2026-09-08T13:29:41.268Z"
-    },
-    {
       "name": "Ceramic Dinner Plate Set",
       "category": "Kitchen",
       "price": 3750,
@@ -430,22 +343,6 @@
         "Dishwasher safe"
       ],
       "_id": "c54b25ebee6d27ce10bf04e8"
-    },
-    {
-      "name": "Baby Diaper Pack",
-      "category": "Baby Items",
-      "price": 1280,
-      "offerPrice": 1150,
-      "inStock": true,
-      "image": [
-        "/images/baby-diaper-pack.png"
-      ],
-      "description": [
-        "2 rackets + 3 shuttlecocks",
-        "Aluminium frame",
-        "Includes carry bag"
-      ],
-      "_id": "e2170270a93700180c29f625"
     },
     {
       "name": "Whole Wheat Flour 1kg",
@@ -464,38 +361,6 @@
       "_id": "54642996fe6a1fef1919edae"
     },
     {
-      "name": "Eggs Dozen",
-      "category": "Grocery",
-      "price": 250,
-      "offerPrice": 199,
-      "inStock": true,
-      "image": [
-        "/images/eggs-dozen.png"
-      ],
-      "description": [
-        "Farm fresh eggs",
-        "12-pack",
-        "Rich in protein"
-      ],
-      "_id": "5ababd25469ced5e9a77d9d7"
-    },
-    {
-      "name": "Vitamin C Facial Cleanser 150ml",
-      "category": "Beauty",
-      "price": 635,
-      "offerPrice": 580,
-      "inStock": true,
-      "image": [
-        "/images/vitamin-c-facial-cleanser-150ml.png"
-      ],
-      "description": [
-        "Brightens skin tone",
-        "Gentle foaming cleanser",
-        "Packed with vitamin C"
-      ],
-      "_id": "2e6f3704fac121bdea761e63"
-    },
-    {
       "name": "Premium Kitchen Knife Set",
       "category": "Kitchen",
       "price": 1750,
@@ -510,102 +375,6 @@
         "Comfort grip handles"
       ],
       "_id": "a957f0eaeb62c906c7fdad60"
-    },
-    {
-      "name": "Baby Feeding Bottle",
-      "category": "Baby Items",
-      "price": 1650,
-      "offerPrice": 1300,
-      "inStock": true,
-      "image": [
-        "/images/baby-feeding-bottle.png"
-      ],
-      "description": [
-        "BPA-free Tritan plastic",
-        "Leak-proof lid",
-        "Flip-top straw"
-      ],
-      "_id": "4b5c3bf95ea264e73033a093"
-    },
-    {
-      "_id": "el01a01e",
-      "name": "Wireless Noise Cancelling Headphones",
-      "category": "Electronics",
-      "price": 3500,
-      "offerPrice": 2200,
-      "inStock": true,
-      "image": [
-        "/images/custom_headphones.png"
-      ],
-      "description": [
-        "Immersive sound with active noise cancellation",
-        "Up to 30 hours of playback",
-        "Soft ear cushions for all-day comfort"
-      ]
-    },
-    {
-      "_id": "el02b02f",
-      "name": "Smart LED TV 42\"",
-      "category": "Electronics",
-      "price": 60000,
-      "offerPrice": 54999,
-      "inStock": true,
-      "image": [
-        "/images/custom_tv_42.png"
-      ],
-      "description": [
-        "Full HD display with vivid colors",
-        "Built-in streaming apps and smart remote",
-        "Slim bezel design for modern rooms"
-      ]
-    },
-    {
-      "_id": "el03c03g",
-      "name": "Bluetooth Portable Speaker",
-      "category": "Electronics",
-      "price": 1850,
-      "offerPrice": 1350,
-      "inStock": true,
-      "image": [
-        "/images/custom_speaker.png"
-      ],
-      "description": [
-        "Rich stereo sound with bass boost",
-        "Water resistant for outdoor use",
-        "12-hour battery life on a single charge"
-      ]
-    },
-    {
-      "_id": "el04d04h",
-      "name": "Gaming Laptop 16GB RAM",
-      "category": "Electronics",
-      "price": 135000,
-      "offerPrice": 117000,
-      "inStock": true,
-      "image": [
-        "/images/custom_gaming_laptop.png"
-      ],
-      "description": [
-        "High-performance processor for gaming",
-        "Fast SSD storage and crisp display",
-        "RGB keyboard and advanced cooling"
-      ]
-    },
-    {
-      "_id": "el05e05i",
-      "name": "Smartphone 128GB",
-      "category": "Electronics",
-      "price": 39999,
-      "offerPrice": 34999,
-      "inStock": true,
-      "image": [
-        "/images/custom_smartphone_128gb.png"
-      ],
-      "description": [
-        "Crystal-clear display and fast performance",
-        "Dual camera system for sharp photos",
-        "Long-lasting battery and fast charging"
-      ]
     },
     {
       "_id": "gd46g23h",
@@ -718,16 +487,6 @@
       "description": []
     },
     {
-      "_id": "ek59j90k",
-      "name": "Paneer 200g",
-      "category": "Dairy",
-      "price": 90,
-      "offerPrice": 85,
-      "inStock": true,
-      "image": [],
-      "description": []
-    },
-    {
       "_id": "ek60j01k",
       "name": "Cheese 200g",
       "category": "Dairy",
@@ -818,16 +577,6 @@
       "description": []
     },
     {
-      "_id": "sp02b98k",
-      "name": "Adjustable Dumbbell Set 20kg",
-      "category": "Sports",
-      "price": 5999,
-      "offerPrice": 4299,
-      "inStock": true,
-      "image": [],
-      "description": []
-    },
-    {
       "_id": "sp03c97k",
       "name": "Cycling Helmet",
       "category": "Sports",
@@ -838,26 +587,6 @@
       "description": [],
       "stock": 7,
       "updatedAt": "2026-09-09T08:20:44.208Z"
-    },
-    {
-      "_id": "sp04d96k",
-      "name": "Badminton Racket Set",
-      "category": "Sports",
-      "price": 1499,
-      "offerPrice": 999,
-      "inStock": true,
-      "image": [],
-      "description": []
-    },
-    {
-      "_id": "sp05e95k",
-      "name": "Running Water Bottle 750ml",
-      "category": "Sports",
-      "price": 699,
-      "offerPrice": 499,
-      "inStock": true,
-      "image": [],
-      "description": []
     },
     {
       "_id": "bk02b30y",
@@ -949,7 +678,81 @@
       "image": [
         "/images/custom_yoga_mat.png"
       ],
-      "description": []
+      "description": [],
+      "stock": 10,
+      "updatedAt": "2026-09-13T15:55:48.316Z"
+    },
+    {
+      "name": "Eggs Dozen",
+      "category": "Grocery",
+      "price": 250,
+      "offerPrice": 199,
+      "inStock": true,
+      "image": [
+        "/images/eggs-dozen.png"
+      ],
+      "description": [
+        "Farm fresh eggs",
+        "12-pack",
+        "Rich in protein"
+      ],
+      "_id": "8c2afc0f0a935b8f72a2205d",
+      "stock": 100,
+      "updatedAt": "2026-09-13T15:56:47.653Z"
+    },
+    {
+      "name": "Baby Stroller",
+      "category": "Baby Items",
+      "price": 8300,
+      "offerPrice": 6900,
+      "inStock": true,
+      "image": [
+        "/images/baby-stroller.png"
+      ],
+      "description": [
+        "In-mould EPS liner",
+        "12 ventilation channels",
+        "Adjustable fit system"
+      ],
+      "_id": "a8bc494a481e0cd2c1abc626",
+      "stock": 10,
+      "updatedAt": "2026-09-13T16:43:10.839Z"
+    },
+    {
+      "name": "Baby Diaper Pack",
+      "category": "Baby Items",
+      "price": 1280,
+      "offerPrice": 1150,
+      "inStock": true,
+      "image": [
+        "/images/baby-diaper-pack.png"
+      ],
+      "description": [
+        "2 rackets + 3 shuttlecocks",
+        "Aluminium frame",
+        "Includes carry bag"
+      ],
+      "_id": "e2170270a93700180c29f625",
+      "stock": 10,
+      "updatedAt": "2026-09-13T16:43:16.690Z"
+    },
+    {
+      "name": "Baby Feeding Bottle",
+      "category": "Baby Items",
+      "price": 1650,
+      "offerPrice": 1300,
+      "inStock": true,
+      "image": [
+        "/images/baby-feeding-bottle.png"
+      ],
+      "description": [
+        "BPA-free Tritan plastic",
+        "Leak-proof lid",
+        "Flip-top straw"
+      ],
+      "_id": "4b5c3bf95ea264e73033a093",
+      "stock": 10,
+      "updatedAt": "2026-09-13T16:43:23.688Z"
     }
   ],
   "orders": [],

@@ -113,7 +113,7 @@ const Navbar = () => {
               className="w-10 h-10 rounded-full object-cover cursor-pointer border border-gray-200"
               onError={(e) => { e.currentTarget.src = assets.profile_icon; }}
             />
-            <ul className="absolute right-0 top-full z-[60] hidden w-40 translate-y-2 rounded-md border border-gray-200 bg-white py-2 text-sm shadow-lg group-hover:block">
+            <ul className="absolute right-0 top-full z-[60] hidden w-40 rounded-md border border-gray-200 bg-white py-2 text-sm shadow-lg group-hover:block">
               <li
                 onClick={() => navigate("/profile")}
                 className="p-2.5 cursor-pointer hover:bg-gray-50"

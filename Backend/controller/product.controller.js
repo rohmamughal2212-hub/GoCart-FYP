@@ -173,6 +173,26 @@ export const addProduct = async (req, res) => {
 //   sort        – featured | price_asc | price_desc | name_asc | newest
 //   page        – page number (default 1)
 //   limit       – items per page (default 12; pass 0 for all)
+const normalizeProductPayload = (product) => {
+  if (!product) return product;
+
+  const raw = product._doc && typeof product._doc === "object" ? product._doc : product;
+  const plain = product.toObject && typeof product.toObject === "function" ? product.toObject() : raw;
+  const price = Number(plain.price ?? raw.price ?? 0);
+  const offerPrice = Number(plain.offerPrice ?? raw.offerPrice ?? plain.price ?? raw.price ?? 0);
+  const stock = Number(plain.stock ?? raw.stock ?? 0);
+
+  return {
+    ...plain,
+    ...raw,
+    _id: plain._id || raw._id || plain.id || raw.id,
+    price,
+    offerPrice,
+    stock,
+    inStock: plain.inStock !== undefined ? Boolean(plain.inStock) : raw.inStock !== undefined ? Boolean(raw.inStock) : stock > 0,
+  };
+};
+
 export const getProducts = async (req, res) => {
   try {
     res.set({
@@ -220,8 +240,11 @@ export const getProducts = async (req, res) => {
       if (maxPrice) query.offerPrice.$lte = Number(maxPrice);
     }
 
-    // Stock
-    if (inStock === "true") query.inStock = true;
+    // Stock: a product is available only when both the flag and quantity agree.
+    if (inStock === "true") {
+      query.inStock = true;
+      query.stock = { $gt: 0 };
+    }
 
     // Sort
     const sortMap = {
@@ -250,14 +273,100 @@ export const getProducts = async (req, res) => {
       console.warn("Product database query failed; using fallback products:", databaseError.message);
     }
 
-    // If DB returned results, use them
+    const buildProductIdentity = (product = {}) => {
+      const category = String(product.category || "Uncategorized").trim().toLowerCase();
+      const name = String(product.name || product.title || "Untitled Product").trim().toLowerCase();
+      return `${category}|${name}`;
+    };
+
+    const dedupeProducts = (items = []) => {
+      const unique = new Map();
+
+      items.forEach((product) => {
+        const normalized = {
+          ...product,
+          _id: product._id || product.id || `${product.name || "untitled"}|${product.category || "uncategorized"}|${product.price || 0}|${product.offerPrice || 0}`,
+          category: product.category || "Uncategorized",
+          name: product.name || product.title || "Untitled Product",
+        };
+
+        const key = buildProductIdentity(normalized);
+        if (!unique.has(key)) unique.set(key, normalized);
+      });
+
+      return [...unique.values()];
+    };
+
+    const selectedCategories = (categories || "")
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean);
+
+    const filterProductsBySelectedCategories = (items = []) => {
+      if (!selectedCategories.length) return items;
+      return items.filter((product) => {
+        const productCategory = String(product.category || "").toLowerCase();
+        return selectedCategories.some((category) => productCategory.includes(category));
+      });
+    };
+
+    const normalizeProductImage = (product, fallbackProducts = []) => {
+      const currentImage = Array.isArray(product?.image) ? product.image : [];
+      if (currentImage.length > 0) return currentImage;
+
+      if (!fallbackProducts.length) return currentImage;
+
+      const exactMatch = fallbackProducts.find((item) => {
+        const sameName = (item.name || "").trim().toLowerCase() === (product.name || "").trim().toLowerCase();
+        const sameCategory = (item.category || "").trim().toLowerCase() === (product.category || "").trim().toLowerCase();
+        return sameName && sameCategory;
+      });
+
+      if (exactMatch && Array.isArray(exactMatch.image) && exactMatch.image.length > 0) {
+        return exactMatch.image;
+      }
+
+      const samePriceMatch = fallbackProducts.find((item) => {
+        const sameCategory = (item.category || "").trim().toLowerCase() === (product.category || "").trim().toLowerCase();
+        const samePrice = Number(item.offerPrice ?? item.price ?? 0) === Number(product.offerPrice ?? product.price ?? 0);
+        return sameCategory && samePrice;
+      });
+
+      if (samePriceMatch && Array.isArray(samePriceMatch.image) && samePriceMatch.image.length > 0) {
+        return samePriceMatch.image;
+      }
+
+      return currentImage;
+    };
+
+    const canonicalCatalog = dedupeProducts([
+      ...loadFallbackProductsWithIds(),
+      ...loadLocalProductsWithIds(),
+    ]);
+    const enrichProductsWithImage = (items = []) => items.map((product) => ({
+      ...product,
+      image: normalizeProductImage(product, canonicalCatalog),
+    }));
+
     if (total && total > 0) {
+      const fallbackProducts = dedupeProducts(filterProductsBySelectedCategories(canonicalCatalog));
+      const dbProducts = dedupeProducts(filterProductsBySelectedCategories(productsFromDb || []));
+      const dbIds = new Set(dbProducts.map((product) => buildProductIdentity(product)));
+      const extraFallbackProducts = fallbackProducts.filter(
+        (product) => !dbIds.has(buildProductIdentity(product)),
+      );
+
+      const merged = enrichProductsWithImage(dedupeProducts([...dbProducts, ...extraFallbackProducts]));
+      const totalMerged = merged.length;
+      const pagedMerged = limitNum === 0 ? merged : merged.slice(skip, skip + limitNum);
+      const safeProducts = pagedMerged.map(normalizeProductPayload);
+
       return res.status(200).json({
         success: true,
-        products: productsFromDb,
-        total,
+        products: safeProducts,
+        total: totalMerged,
         page: pageNum,
-        pages: limitNum === 0 ? 1 : Math.ceil(total / limitNum),
+        pages: limitNum === 0 ? 1 : Math.ceil(totalMerged / limitNum),
       });
     }
 
@@ -289,7 +398,9 @@ export const getProducts = async (req, res) => {
         return true;
       });
     }
-    if (inStock === "true") filtered = filtered.filter((p) => p.inStock);
+    if (inStock === "true") {
+      filtered = filtered.filter((p) => p.inStock === true && Number(p.stock) > 0);
+    }
 
     // Sorting
     const sortFuncs = {
@@ -302,13 +413,15 @@ export const getProducts = async (req, res) => {
     const sortFn = sortFuncs[sort] || sortFuncs.featured;
     filtered = filtered.slice().sort(sortFn);
 
+    filtered = dedupeProducts(filtered);
     const totalLocal = filtered.length;
     const pages = limitNum === 0 ? 1 : Math.ceil(totalLocal / limitNum);
-    const paged = limitNum === 0 ? filtered : filtered.slice(skip, skip + limitNum);
+    const paged = enrichProductsWithImage(limitNum === 0 ? filtered : filtered.slice(skip, skip + limitNum));
+    const safeProducts = paged.map(normalizeProductPayload);
 
     return res.status(200).json({
       success: true,
-      products: paged,
+      products: safeProducts,
       total: totalLocal,
       page: pageNum,
       pages,
@@ -344,7 +457,7 @@ export const getProductMeta = async (req, res) => {
           $group: {
             _id: "$category",
             total: { $sum: 1 },
-            inStock: { $sum: { $cond: ["$inStock", 1, 0] } },
+            inStock: { $sum: { $cond: [{ $and: ["$inStock", { $gt: ["$stock", 0] }] }, 1, 0] } },
           },
         },
         { $sort: { _id: 1 } },
@@ -372,7 +485,7 @@ export const getProductMeta = async (req, res) => {
           const cat = p.category;
           categoryCounts[cat] = categoryCounts[cat] || { total: 0, inStock: 0 };
           categoryCounts[cat].total += 1;
-          if (p.inStock) categoryCounts[cat].inStock += 1;
+          if (p.inStock === true && Number(p.stock) > 0) categoryCounts[cat].inStock += 1;
         });
       }
     }
@@ -414,7 +527,7 @@ export const getProductById = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Product not found" });
-    res.status(200).json({ success: true, product });
+    res.status(200).json({ success: true, product: normalizeProductPayload(product) });
   } catch (error) {
     console.error("getProductById error:", error);
     res
@@ -461,10 +574,10 @@ export const deleteProductByName = async (req, res) => {
       return res.status(400).json({ success: false, message: "Name parameter required" });
     }
     const result = await Product.deleteOne({ name });
-    res.status(200).json({ 
-      success: true, 
-      message: `Deleted ${result.deletedCount} product(s)`, 
-      deletedCount: result.deletedCount 
+    res.status(200).json({
+      success: true,
+      message: `Deleted ${result.deletedCount} product(s)`,
+      deletedCount: result.deletedCount
     });
   } catch (error) {
     console.error("deleteProductByName error:", error);

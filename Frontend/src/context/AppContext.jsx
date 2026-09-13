@@ -4,8 +4,18 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
-const rawBackendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5000";
-axios.defaults.baseURL = rawBackendUrl.replace(/^"|"$/g, "");
+const getBackendBaseUrl = () => {
+  const configured = import.meta.env.VITE_BACKEND_URL?.replace(/^"|"$/g, "");
+  if (configured) return configured;
+
+  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "0.0.0.0")) {
+    return "http://localhost:5000";
+  }
+
+  return "https://gocart-api.vercel.app";
+};
+
+axios.defaults.baseURL = getBackendBaseUrl();
 
 axios.interceptors.request.use((config) => {
   const userToken = localStorage.getItem("userToken");

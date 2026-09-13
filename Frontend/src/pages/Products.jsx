@@ -262,7 +262,7 @@ export default function Products() {
           if ((p.offerPrice || p.price || 0) > max) return false;
         }
 
-        if (appliedInStock && p.inStock === false) return false;
+        if (appliedInStock && p.inStock !== true) return false;
 
         return true;
       });
@@ -329,6 +329,12 @@ export default function Products() {
     setPage(1);
   };
 
+  const handleStockChange = (inStock) => {
+    setDraftInStock(inStock);
+    setAppliedInStock(inStock);
+    setPage(1);
+  };
+
   const applyFilters = () => {
     setAppliedCategories([...draftCategories]);
     setAppliedPriceMin(draftPriceMin);
@@ -382,7 +388,7 @@ export default function Products() {
     draftCategories, onToggleCategory: handleToggleCategory,
     draftPriceMin, onPriceMinChange: setDraftPriceMin,
     draftPriceMax, onPriceMaxChange: setDraftPriceMax,
-    draftInStock, onInStockChange: setDraftInStock,
+    draftInStock, onInStockChange: handleStockChange,
     meta, hasPending, onApply: applyFilters, onClearAll: clearAll, chips,
   };
 

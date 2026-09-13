@@ -9,6 +9,8 @@ import { dbAvailable } from "../config/connectDB.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import crypto from "crypto";
+import { upload } from "../config/multer.js";
 
 const router = express.Router();
 
@@ -520,21 +522,35 @@ router.put("/products/:id", async (req, res) => {
 // Delete a product (fallback or DB)
 router.delete("/products/:id", async (req, res) => {
   const { id } = req.params;
+  let deleted = false;
+
   try {
     if (isMongoReady()) {
-      await Product.findByIdAndDelete(id);
-      loadFallbackDb();
-      const before = fallbackDb.products.length;
-      fallbackDb.products = fallbackDb.products.filter((p) => String(p._id || p.id || "") !== String(id));
-      if (fallbackDb.products.length < before) writeFallbackDbFile(fallbackDb);
-      return res.json({ success: true });
+      const mongoDeleted = await Product.findByIdAndDelete(id).catch(() => null);
+      if (mongoDeleted) deleted = true;
     }
 
     loadFallbackDb();
+    const productToDelete = fallbackDb.products.find((p) => String(p._id || p.id || "") === String(id));
+    const identityToDelete = productToDelete
+      ? `${String(productToDelete.category || "").trim().toLowerCase()}|${String(productToDelete.name || "").trim().toLowerCase()}`
+      : null;
+
     const before = fallbackDb.products.length;
-    fallbackDb.products = fallbackDb.products.filter((p) => (String(p._id || p.id || p._id) !== String(id) && String(p.id) !== String(id)));
-    try { writeFallbackDbFile(fallbackDb); } catch (err) { console.warn("Could not write fallback DB:", err.message); }
-    if (fallbackDb.products.length < before) return res.json({ success: true });
+    fallbackDb.products = fallbackDb.products.filter((p) => {
+      const productId = String(p._id || p.id || "");
+      if (productId === String(id)) return false;
+      if (!identityToDelete) return true;
+      const currentIdentity = `${String(p.category || "").trim().toLowerCase()}|${String(p.name || "").trim().toLowerCase()}`;
+      return currentIdentity !== identityToDelete;
+    });
+
+    if (fallbackDb.products.length < before) {
+      deleted = true;
+      try { writeFallbackDbFile(fallbackDb); } catch (err) { console.warn("Could not write fallback DB:", err.message); }
+    }
+
+    if (deleted) return res.json({ success: true, message: "Product deleted" });
     return res.status(404).json({ success: false, message: "Product not found" });
   } catch (error) {
     console.error("Error deleting product:", error);
@@ -542,12 +558,7 @@ router.delete("/products/:id", async (req, res) => {
   }
 });
 
-export default router;
-
 // Admin: add a product to the fallback DB (accepts multipart images)
-import { upload } from "../config/multer.js";
-import crypto from "crypto";
-
 router.post(
   "/products/add-fallback",
   upload.array("image", 4),
@@ -569,26 +580,82 @@ router.post(
         }
       }
 
+      const normalizedDescription = Array.isArray(description)
+        ? description
+        : String(description || "").split("\n").map((line) => line.trim()).filter(Boolean);
+      const normalizedCategory = String(category || "").trim();
+      const normalizedName = String(name || "").trim();
+      const numericPrice = Number(price) || 0;
+      const numericOfferPrice = Number(offerPrice) || numericPrice || 0;
+      const numericStock = Number(stock) || 0;
+
       const generateStableId = (value) =>
         crypto.createHash("md5").update(String(value)).digest("hex").slice(0, 24);
 
-      const pid = generateStableId(`${category}|${name}|${price}|${offerPrice}|${Date.now()}`);
+      const pid = generateStableId(`${normalizedCategory}|${normalizedName}|${numericPrice}|${numericOfferPrice}|${Date.now()}`);
       const newProduct = {
         _id: pid,
-        name,
-        description: Array.isArray(description) ? description : String(description).split("\n"),
-        category,
-        price: Number(price) || 0,
-        offerPrice: Number(offerPrice) || Number(price) || 0,
-        stock: Number(stock) || 0,
-        inStock: Number(stock) > 0,
+        name: normalizedName,
+        description: normalizedDescription,
+        category: normalizedCategory,
+        price: numericPrice,
+        offerPrice: numericOfferPrice,
+        stock: numericStock,
+        inStock: numericStock > 0,
         image: images,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
+      if (isMongoReady()) {
+        const mongoPayload = {
+          ...newProduct,
+          _id: undefined,
+          description: normalizedDescription,
+          price: numericPrice,
+          offerPrice: numericOfferPrice,
+          stock: numericStock,
+          inStock: numericStock > 0,
+          image: images,
+        };
+
+        const existing = await Product.findOne({ name: normalizedName, category: normalizedCategory }).lean();
+        if (existing) {
+          const saved = await Product.findByIdAndUpdate(existing._id, mongoPayload, { new: true });
+          if (saved) newProduct._id = String(saved._id);
+        } else {
+          const saved = await Product.create(mongoPayload);
+          if (saved) newProduct._id = String(saved._id);
+        }
+      }
+
       fallbackDb.products = fallbackDb.products || [];
-      fallbackDb.products.push(newProduct);
+      const buildProductIdentity = (product = {}) => {
+        const productName = String(product.name || "").trim().toLowerCase();
+        const productCategory = String(product.category || "").trim().toLowerCase();
+        return `${productCategory}|${productName}`;
+      };
+
+      const incomingIdentity = buildProductIdentity(newProduct);
+      fallbackDb.products = fallbackDb.products.filter(
+        (product) => buildProductIdentity(product) !== incomingIdentity,
+      );
+
+      const existingFallbackIndex = fallbackDb.products.findIndex(
+        (product) => buildProductIdentity(product) === incomingIdentity,
+      );
+
+      if (existingFallbackIndex >= 0) {
+        fallbackDb.products[existingFallbackIndex] = {
+          ...fallbackDb.products[existingFallbackIndex],
+          ...newProduct,
+          _id: fallbackDb.products[existingFallbackIndex]._id || newProduct._id,
+          updatedAt: new Date().toISOString(),
+        };
+      } else {
+        fallbackDb.products.push(newProduct);
+      }
+
       const ok = writeFallbackDbFile(fallbackDb);
       if (!ok) return res.status(500).json({ success: false, message: "Failed to persist product" });
       return res.status(201).json({ success: true, product: newProduct, message: "Product added to fallback DB" });
@@ -598,3 +665,5 @@ router.post(
     }
   },
 );
+
+export default router;
