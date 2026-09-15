@@ -7,6 +7,17 @@ import { ProductSkeletonGrid } from "../components/Loading";
 import { useAppContext } from "../context/AppContext";
 
 const EXCLUDED_PRODUCT_IDS = new Set(["da8498941205efd19d8743db"]);
+const ALLOWED_CATEGORIES = new Set([
+  "electronics",
+  "sports",
+  "grocery",
+  "meat",
+  "beauty",
+  "kitchen",
+  "garments",
+  "baby",
+  "baby items",
+]);
 const isExcludedProduct = (product) => (
   EXCLUDED_PRODUCT_IDS.has(product._id)
   || (
@@ -25,6 +36,7 @@ export default function ProductCategory() {
   const [total, setTotal] = useState(0);
 
   const catInfo = CATEGORY_LIST.find((c) => c.path.toLowerCase() === category);
+  const categoryKey = (catInfo?.path || category).toLowerCase().trim();
 
   useEffect(() => {
     setLoading(true);
@@ -36,7 +48,7 @@ export default function ProductCategory() {
         if (data.success && Array.isArray(data.products) && data.products.length > 0) {
           // Merge app-context products only when they EXACTLY match the category
           const apiProducts = data.products.filter((product) => !isExcludedProduct(product));
-          const catKey = (catInfo?.path || category).toLowerCase().trim();
+          const catKey = categoryKey;
           const localMatches = (ctxProducts || []).filter(
             (p) => ((p.category || "").toString().toLowerCase().trim() === catKey)
               && !isExcludedProduct(p)
@@ -49,10 +61,12 @@ export default function ProductCategory() {
           setTotal(Math.max(data.total || apiProducts.length, merged.length));
         } else {
           // API returned no products — fallback to bundled dummy products or electronics dataset
-          const catKey = (catInfo?.path || category).toLowerCase();
-          const list = catKey === "electronics"
+          const catKey = categoryKey;
+          const list = ALLOWED_CATEGORIES.has(catKey) && catKey === "electronics"
             ? electronicsProducts
-            : dummyProducts.filter((p) => (p.category || "").toLowerCase() === catKey);
+            : ALLOWED_CATEGORIES.has(catKey)
+              ? dummyProducts.filter((p) => (p.category || "").toLowerCase() === catKey)
+              : [];
           setProducts(list);
           setTotal(list.length);
         }
@@ -60,10 +74,12 @@ export default function ProductCategory() {
       .catch((err) => {
         console.error(err);
         // Network error — fallback to bundled dummy products or electronics dataset
-        const catKey = (catInfo?.path || category).toLowerCase();
-        const list = catKey === "electronics"
+        const catKey = categoryKey;
+        const list = ALLOWED_CATEGORIES.has(catKey) && catKey === "electronics"
           ? electronicsProducts
-          : dummyProducts.filter((p) => (p.category || "").toLowerCase() === catKey);
+          : ALLOWED_CATEGORIES.has(catKey)
+            ? dummyProducts.filter((p) => (p.category || "").toLowerCase() === catKey)
+            : [];
         setProducts(list);
         setTotal(list.length);
       })

@@ -1,31 +1,35 @@
 import { categories } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 
-const EXCLUDED_PRODUCT_IDS = new Set(["da8498941205efd19d8743db"]);
-const isExcludedProduct = (product) => (
-  EXCLUDED_PRODUCT_IDS.has(product._id)
-  || (
-    (product.name || "").toString().toLowerCase().trim() === "eggs dozen"
-    && (product.category || "").toString().toLowerCase().trim() === "meat"
-  )
-);
+const APPROVED_PUBLIC_CATEGORIES = [
+  "Electronics",
+  "Sports",
+  "Grocery",
+  "Meat",
+  "Beauty",
+  "Kitchen",
+  "Garments",
+  "Baby Items",
+];
+
+const isApprovedPublicProduct = (product) => {
+  const category = (product?.category || "").toString().trim();
+  return APPROVED_PUBLIC_CATEGORIES.includes(category);
+};
 
 const Category = () => {
   const { navigate, products } = useAppContext();
+  const publicProducts = (products || []).filter(isApprovedPublicProduct);
   const counts = (categories || []).slice(0, 8).map((category) => {
     const catKey = (category.path || category.text || "").toString().toLowerCase().trim();
-    const cnt = (products || []).reduce(
-      (acc, p) => {
-        const productCategory = (p.category || "").toString().toLowerCase().trim();
-        if (isExcludedProduct(p)) return acc;
-        return acc + (productCategory.includes(catKey) ? 1 : 0);
-      },
-      0,
-    );
+    const cnt = publicProducts.reduce((acc, p) => {
+      const productCategory = (p.category || "").toString().toLowerCase().trim();
+      return acc + (productCategory.includes(catKey) ? 1 : 0);
+    }, 0);
     return cnt;
   });
 
-  const totalForEight = (products || []).length;
+  const totalForEight = publicProducts.length;
 
   return (
     <div className="mt-16">

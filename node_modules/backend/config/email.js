@@ -158,7 +158,9 @@ const createEtherealTransporter = async () => {
 };
 
 export const sendEmail = async ({ to, subject, html }) => {
-  const fromAddress = stripQuotes(process.env.EMAIL_FROM || smtpUser || "no-reply@gocart.local");
+  const configuredFrom = stripQuotes(process.env.EMAIL_FROM || smtpUser || "no-reply@gocart.local");
+  const senderAddress = configuredFrom.match(/<([^>]+)>/)?.[1] || configuredFrom;
+  const fromAddress = `GoCart <${senderAddress}>`;
   let transportType = "SMTP";
   let transporter;
   try {

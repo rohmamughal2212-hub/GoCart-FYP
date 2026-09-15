@@ -1,23 +1,21 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import { assets, dummyProducts, electronicsProducts } from "../assets/assets";
 import toast from "react-hot-toast";
 
 const STATUS_COLORS = {
   "Order Placed": "bg-blue-100 text-blue-700",
-  Processing:     "bg-yellow-100 text-yellow-700",
-  Shipped:        "bg-purple-100 text-purple-700",
-  Delivered:      "bg-green-100 text-green-700",
-  Cancelled:      "bg-red-100 text-red-600",
+  Processing: "bg-yellow-100 text-yellow-700",
+  Shipped: "bg-purple-100 text-purple-700",
+  Delivered: "bg-green-100 text-green-700",
+  Cancelled: "bg-red-100 text-red-600",
 };
 
 const MyOrders = () => {
-  const [myOrders, setMyOrders]     = useState([]);
-  const [verifying, setVerifying]   = useState(false);
+  const [myOrders, setMyOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
-  const { axios, user, setCartItems, navigate } = useAppContext();
-  const location = useLocation();
+  const { axios, user, navigate } = useAppContext();
 
   const fetchOrders = async () => {
     setOrdersLoading(true);
@@ -31,37 +29,6 @@ const MyOrders = () => {
       setOrdersLoading(false);
     }
   };
-
-  /* ── Stripe payment verification on redirect back ── */
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const sessionId = params.get("session_id");
-    const payment   = params.get("payment");
-
-    if (payment === "success" && sessionId) {
-      setVerifying(true);
-      axios
-        .post("/api/order/stripe/verify", { sessionId })
-        .then(({ data }) => {
-          if (data.success) {
-            toast.success("Payment confirmed! Your order is placed.");
-            setCartItems({});           // clear frontend cart state
-          } else {
-            toast.error(data.message || "Payment verification failed");
-          }
-        })
-        .catch(() => toast.error("Could not verify payment. Contact support."))
-        .finally(() => {
-          setVerifying(false);
-          // Remove query params from URL without re-mounting the page
-          window.history.replaceState({}, "", "/my-orders");
-          fetchOrders();
-        });
-    } else if (payment === "cancelled") {
-      toast.error("Payment was cancelled. Your order has not been placed.");
-      window.history.replaceState({}, "", "/my-orders");
-    }
-  }, []);
 
   /* ── Load orders on mount / when user is available ── */
   useEffect(() => {
@@ -78,15 +45,6 @@ const MyOrders = () => {
       toast.error(error.message);
     }
   };
-
-  if (verifying) {
-    return (
-      <div className="flex flex-col items-center justify-center py-32 gap-4">
-        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-500">Verifying your payment…</p>
-      </div>
-    );
-  }
 
   if (ordersLoading) {
     return (

@@ -27,19 +27,12 @@ import bottom_banner_image_sm from "./bottom_banner_image_sm.png";
 import banner1 from "./banner1.png";
 import banner2 from "./banner2.png";
 import add_address_iamge from "./add_address_image.svg";
-import organic_vegitable_image from "./organic_vegitable_image.png";
 import fresh_fruits_image from "./fresh_fruits_image.png";
 import bottles_image from "./bottles_image.png";
 import maggi_image from "./maggi_image.png";
 import dairy_product_image from "./dairy_product_image.png";
 import bakery_image from "./bakery_image.png";
 import grain_image from "./grain_image.png";
-import potato_image_1 from "./potato_image_1.png";
-import potato_image_2 from "./potato_image_2.png";
-import potato_image_3 from "./potato_image_3.png";
-import potato_image_4 from "./potato_image_4.png";
-import tomato_image from "./tomato_image.png";
-import carrot_image from "./carrot_image.png";
 import apple_image from "./apple_image.png";
 import coca_cola_image from "./coca_cola_image.png";
 import brown_bread_image from "./brown_bread_image.png";
@@ -50,8 +43,6 @@ import pepsi_image from "./pepsi_image.png";
 import wheat_flour_image from "./wheat_flour_image.png";
 import cheese_image from "./cheese_image.png";
 import eggs_image from "./eggs_image.png";
-import spinach_image_1 from "./spinach_image_1.png";
-import onion_image_1 from "./onion_image_1.png";
 import banana_image_1 from "./banana_image_1.png";
 import mango_image_1 from "./mango_image_1.png";
 import grapes_image_1 from "./grapes_image_1.png";
@@ -345,89 +336,6 @@ export const electronicsProducts = [
 ];
 
 export const dummyProducts = [
-  // Vegetables
-  {
-    _id: "gd46g23h",
-    name: "Potato 500g",
-    category: "Vegetables",
-    price: 25,
-    offerPrice: 20,
-    image: [potato_image_1, potato_image_2, potato_image_3, potato_image_4],
-    description: [
-      "Fresh and organic",
-      "Rich in carbohydrates",
-      "Ideal for curries and fries",
-    ],
-    createdAt: "2025-03-25T07:17:46.018Z",
-    updatedAt: "2025-03-25T07:18:13.103Z",
-    inStock: true,
-  },
-  {
-    _id: "gd47g34h",
-    name: "Tomato 1 kg",
-    category: "Vegetables",
-    price: 40,
-    offerPrice: 35,
-    image: [tomato_image],
-    description: [
-      "Juicy and ripe",
-      "Rich in Vitamin C",
-      "Perfect for salads and sauces",
-      "Farm fresh quality",
-    ],
-    createdAt: "2025-03-25T07:17:46.018Z",
-    updatedAt: "2025-03-25T07:18:13.103Z",
-    inStock: true,
-  },
-  {
-    _id: "gd48g45h",
-    name: "Carrot 500g",
-    category: "Vegetables",
-    price: 30,
-    offerPrice: 28,
-    image: [carrot_image],
-    description: [
-      "Sweet and crunchy",
-      "Good for eyesight",
-      "Ideal for juices and salads",
-    ],
-    createdAt: "2025-03-25T07:17:46.018Z",
-    updatedAt: "2025-03-25T07:18:13.103Z",
-    inStock: true,
-  },
-  {
-    _id: "gd49g56h",
-    name: "Spinach 500g",
-    category: "Vegetables",
-    price: 18,
-    offerPrice: 15,
-    image: [spinach_image_1],
-    description: [
-      "Rich in iron",
-      "High in vitamins",
-      "Perfect for soups and salads",
-    ],
-    createdAt: "2025-03-25T07:17:46.018Z",
-    updatedAt: "2025-03-25T07:18:13.103Z",
-    inStock: true,
-  },
-  {
-    _id: "gd50g67h",
-    name: "Onion 500g",
-    category: "Vegetables",
-    price: 22,
-    offerPrice: 19,
-    image: [onion_image_1],
-    description: [
-      "Fresh and pungent",
-      "Perfect for cooking",
-      "A kitchen staple",
-    ],
-    createdAt: "2025-03-25T07:17:46.018Z",
-    updatedAt: "2025-03-25T07:18:13.103Z",
-    inStock: true,
-  },
-
   // Fruits
   {
     _id: "ek51j12k",

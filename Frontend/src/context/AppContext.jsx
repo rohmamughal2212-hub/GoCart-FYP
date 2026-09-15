@@ -49,8 +49,16 @@ export const AppContext = createContext(null);
 
 const GUEST_CART_KEY = "guest_cart";
 
-// Only show products from these 8 categories on home page
-const ALLOWED_CATEGORIES = ["Electronics", "Sports", "Grocery", "Meat", "Beauty", "Kitchen", "Garments", "Baby"];
+const ALLOWED_CATEGORIES = [
+  "Electronics",
+  "Sports",
+  "Grocery",
+  "Meat",
+  "Beauty",
+  "Kitchen",
+  "Garments",
+  "Baby Items",
+];
 
 export const AppContextProvider = ({ children }) => {
   const navigate = useNavigate();
@@ -111,14 +119,13 @@ export const AppContextProvider = ({ children }) => {
     try {
       const { data } = await axios.get(`/api/product/list?limit=1000&_=${Date.now()}`);
       if (data && data.success) {
-        // Filter products to only include the 8 allowed categories.
-        // Use substring, case-insensitive match so categories like
-        // "Baby Items" count for allowed key "Baby".
-        const filtered = (data.products || []).filter((p) =>
-          ALLOWED_CATEGORIES.some((cat) =>
-            (p.category || "").toString().toLowerCase().includes(cat.toLowerCase())
+        const filtered = ALLOWED_CATEGORIES.length
+          ? (data.products || []).filter((p) =>
+            ALLOWED_CATEGORIES.some((cat) =>
+              (p.category || "").toString().toLowerCase().includes(cat.toLowerCase())
+            )
           )
-        );
+          : (data.products || []);
         setProducts(filtered);
       } else if (data && !data.success) {
         const msg = data.message || "No products returned";

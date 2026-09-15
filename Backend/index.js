@@ -12,7 +12,6 @@ import cartRoutes from "./routes/cart.routes.js";
 import addressRoutes from "./routes/address.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
-import couponRoutes from "./routes/coupon.routes.js";
 import newsletterRoutes from "./routes/newsletter.routes.js";
 import supportRoutes from "./routes/support.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
@@ -138,7 +137,6 @@ const routers = [
   ['/api/address', addressRoutes],
   ['/api/order', orderRoutes],
   ['/api/review', reviewRoutes],
-  ['/api/coupon', couponRoutes],
   ['/api/newsletter', newsletterRoutes],
   ['/api/support', supportRoutes],
 ];

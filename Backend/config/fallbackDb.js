@@ -14,43 +14,60 @@ const fallbackDb = {
 };
 
 const FALLBACK_DB_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "data", "fallbackDb.json");
+const FALLBACK_DB_CANDIDATES = [
+  FALLBACK_DB_PATH,
+  path.join("/tmp", "gocart-fallbackDb.json"),
+  path.join(process.cwd(), "data", "fallbackDb.json"),
+];
 
 const normalizeEmail = (email) => (email || "").toLowerCase().trim();
 
 const loadFallbackDb = () => {
-  try {
-    if (!fs.existsSync(FALLBACK_DB_PATH)) return;
-    const raw = fs.readFileSync(FALLBACK_DB_PATH, "utf8");
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === "object") {
-      fallbackDb.users = Array.isArray(parsed.users) ? parsed.users : [];
-      fallbackDb.products = Array.isArray(parsed.products) ? parsed.products : [];
-      fallbackDb.addresses = Array.isArray(parsed.addresses) ? parsed.addresses : [];
-      fallbackDb.orders = Array.isArray(parsed.orders) ? parsed.orders : [];
-      fallbackDb.reviews = Array.isArray(parsed.reviews) ? parsed.reviews : [];
-      fallbackDb.newsletters = Array.isArray(parsed.newsletters) ? parsed.newsletters : [];
-      fallbackDb.nextId = Number(parsed.nextId) || fallbackDb.nextId;
+  for (const candidatePath of FALLBACK_DB_CANDIDATES) {
+    try {
+      if (!fs.existsSync(candidatePath)) continue;
+      const raw = fs.readFileSync(candidatePath, "utf8");
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        fallbackDb.users = Array.isArray(parsed.users) ? parsed.users : [];
+        fallbackDb.products = Array.isArray(parsed.products) ? parsed.products : [];
+        fallbackDb.addresses = Array.isArray(parsed.addresses) ? parsed.addresses : [];
+        fallbackDb.orders = Array.isArray(parsed.orders) ? parsed.orders : [];
+        fallbackDb.reviews = Array.isArray(parsed.reviews) ? parsed.reviews : [];
+        fallbackDb.newsletters = Array.isArray(parsed.newsletters) ? parsed.newsletters : [];
+        fallbackDb.nextId = Number(parsed.nextId) || fallbackDb.nextId;
+        return;
+      }
+    } catch (error) {
+      console.warn(`Could not load fallback DB file from ${candidatePath}:`, error.message);
     }
-  } catch (error) {
-    console.warn("Could not load fallback DB file:", error.message);
   }
 };
 
 const saveFallbackDb = () => {
-  try {
-    const payload = {
-      users: fallbackDb.users,
-      products: fallbackDb.products,
-      addresses: fallbackDb.addresses,
-      orders: fallbackDb.orders,
-      reviews: fallbackDb.reviews,
-      newsletters: fallbackDb.newsletters,
-      nextId: fallbackDb.nextId,
-    };
-    fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(payload, null, 2), "utf8");
-  } catch (error) {
-    console.warn("Could not persist fallback DB file:", error.message);
+  const payload = {
+    users: fallbackDb.users,
+    products: fallbackDb.products,
+    addresses: fallbackDb.addresses,
+    orders: fallbackDb.orders,
+    reviews: fallbackDb.reviews,
+    newsletters: fallbackDb.newsletters,
+    nextId: fallbackDb.nextId,
+  };
+
+  let lastError = null;
+  for (const candidatePath of FALLBACK_DB_CANDIDATES) {
+    try {
+      const dir = path.dirname(candidatePath);
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(candidatePath, JSON.stringify(payload, null, 2), "utf8");
+      return;
+    } catch (error) {
+      lastError = error;
+    }
   }
+
+  console.warn("Could not persist fallback DB file to any writable path:", lastError?.message || "unknown error");
 };
 
 loadFallbackDb();

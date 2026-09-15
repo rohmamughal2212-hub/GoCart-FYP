@@ -166,13 +166,24 @@ export const addProduct = async (req, res) => {
 // GET /api/product/list
 // Query params:
 //   search      – text match on name (case-insensitive)
-//   categories  – comma-separated list, e.g. "Vegetables,Fruits"
+//   categories  – comma-separated list, e.g. "Grocery,Meat"
 //   minPrice    – minimum offerPrice
 //   maxPrice    – maximum offerPrice
 //   inStock     – "true" to show only in-stock items
 //   sort        – featured | price_asc | price_desc | name_asc | newest
 //   page        – page number (default 1)
 //   limit       – items per page (default 12; pass 0 for all)
+const APPROVED_PUBLIC_CATEGORIES = [
+  "Electronics",
+  "Sports",
+  "Grocery",
+  "Meat",
+  "Beauty",
+  "Kitchen",
+  "Garments",
+  "Baby Items",
+];
+
 const normalizeProductPayload = (product) => {
   if (!product) return product;
 
@@ -191,6 +202,33 @@ const normalizeProductPayload = (product) => {
     stock,
     inStock: plain.inStock !== undefined ? Boolean(plain.inStock) : raw.inStock !== undefined ? Boolean(raw.inStock) : stock > 0,
   };
+};
+
+const isApprovedPublicCategory = (productCategory) => {
+  const categoryValue = String(productCategory || "").trim();
+  return APPROVED_PUBLIC_CATEGORIES.some(
+    (category) => categoryValue.toLowerCase() === category.toLowerCase() || categoryValue.toLowerCase().includes(category.toLowerCase()),
+  );
+};
+
+const sanitizePublicCatalog = (products = []) => {
+  const seen = new Set();
+  const approved = [];
+
+  for (const product of products) {
+    const category = String(product?.category || "").trim();
+    const name = String(product?.name || product?.title || "").trim();
+
+    if (!category || !name || !isApprovedPublicCategory(category)) continue;
+
+    const identity = `${category.toLowerCase()}|${name.toLowerCase()}`;
+    if (seen.has(identity)) continue;
+
+    seen.add(identity);
+    approved.push(product);
+  }
+
+  return approved.slice(0, 42);
 };
 
 export const getProducts = async (req, res) => {
@@ -213,6 +251,13 @@ export const getProducts = async (req, res) => {
     } = req.query;
 
     const query = {};
+
+    // Public storefront should only show the approved category list and the cleaned catalog.
+    const selectedCategories = (categories || String(APPROVED_PUBLIC_CATEGORIES.join(","))).split(",").map((value) => value.trim()).filter(Boolean);
+    const filteredCategories = selectedCategories.length ? selectedCategories : APPROVED_PUBLIC_CATEGORIES;
+    if (!categories || !categories.trim()) {
+      query.category = { $in: filteredCategories.map((value) => new RegExp(value, "i")) };
+    }
 
     // Text search
     if (search && search.trim()) {
@@ -297,16 +342,16 @@ export const getProducts = async (req, res) => {
       return [...unique.values()];
     };
 
-    const selectedCategories = (categories || "")
+    const selectedCategoryFilters = (categories || "")
       .split(",")
       .map((value) => value.trim().toLowerCase())
       .filter(Boolean);
 
     const filterProductsBySelectedCategories = (items = []) => {
-      if (!selectedCategories.length) return items;
+      if (!selectedCategoryFilters.length) return items;
       return items.filter((product) => {
         const productCategory = String(product.category || "").toLowerCase();
-        return selectedCategories.some((category) => productCategory.includes(category));
+        return selectedCategoryFilters.some((category) => productCategory.includes(category));
       });
     };
 
@@ -357,8 +402,9 @@ export const getProducts = async (req, res) => {
       );
 
       const merged = enrichProductsWithImage(dedupeProducts([...dbProducts, ...extraFallbackProducts]));
-      const totalMerged = merged.length;
-      const pagedMerged = limitNum === 0 ? merged : merged.slice(skip, skip + limitNum);
+      const publicCatalog = sanitizePublicCatalog(merged).filter((product) => product && isApprovedPublicCategory(product.category));
+      const totalMerged = publicCatalog.length;
+      const pagedMerged = limitNum === 0 ? publicCatalog : publicCatalog.slice(skip, skip + limitNum);
       const safeProducts = pagedMerged.map(normalizeProductPayload);
 
       return res.status(200).json({
@@ -414,9 +460,10 @@ export const getProducts = async (req, res) => {
     filtered = filtered.slice().sort(sortFn);
 
     filtered = dedupeProducts(filtered);
-    const totalLocal = filtered.length;
+    const publicCatalog = sanitizePublicCatalog(filtered).filter((product) => product && isApprovedPublicCategory(product.category));
+    const totalLocal = publicCatalog.length;
     const pages = limitNum === 0 ? 1 : Math.ceil(totalLocal / limitNum);
-    const paged = enrichProductsWithImage(limitNum === 0 ? filtered : filtered.slice(skip, skip + limitNum));
+    const paged = enrichProductsWithImage(limitNum === 0 ? publicCatalog : publicCatalog.slice(skip, skip + limitNum));
     const safeProducts = paged.map(normalizeProductPayload);
 
     return res.status(200).json({

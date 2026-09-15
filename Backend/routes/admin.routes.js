@@ -20,41 +20,58 @@ const isMongoReady = () => dbAvailable && mongoose.connection.readyState === 1;
 let fallbackDb = { users: [], products: [], orders: [], addresses: [] };
 const __filename = fileURLToPath(import.meta.url);
 const FALLBACK_DB_PATH = path.join(path.dirname(__filename), "..", "data", "fallbackDb.json");
+const FALLBACK_DB_CANDIDATES = [
+  FALLBACK_DB_PATH,
+  path.join("/tmp", "gocart-fallbackDb.json"),
+  path.join(process.cwd(), "data", "fallbackDb.json"),
+];
 
 const loadFallbackDb = () => {
-  try {
-    if (fs.existsSync(FALLBACK_DB_PATH)) {
-      const raw = fs.readFileSync(FALLBACK_DB_PATH, "utf8");
+  for (const candidate of FALLBACK_DB_CANDIDATES) {
+    try {
+      if (!fs.existsSync(candidate)) continue;
+      const raw = fs.readFileSync(candidate, "utf8");
       const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") continue;
       fallbackDb = {
         users: Array.isArray(parsed.users) ? parsed.users : [],
         products: Array.isArray(parsed.products) ? parsed.products : [],
         orders: Array.isArray(parsed.orders) ? parsed.orders : [],
         addresses: Array.isArray(parsed.addresses) ? parsed.addresses : [],
       };
+      return;
+    } catch (error) {
+      console.warn(`Could not load fallback DB from ${candidate}:`, error.message);
     }
-  } catch (error) {
-    console.warn("Could not load fallback DB:", error.message);
   }
 };
 
 const writeFallbackDbFile = (obj) => {
-  try {
-    const dir = path.dirname(FALLBACK_DB_PATH);
-    const tmp = path.join(dir, `${path.basename(FALLBACK_DB_PATH)}.tmp`);
-    fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), "utf8");
-    fs.renameSync(tmp, FALLBACK_DB_PATH);
-    return true;
-  } catch (err) {
-    console.warn("Could not write fallback DB atomically:", err.message);
+  let lastError = null;
+
+  for (const filePath of FALLBACK_DB_CANDIDATES) {
     try {
-      fs.writeFileSync(FALLBACK_DB_PATH, JSON.stringify(obj, null, 2), "utf8");
+      const dir = path.dirname(filePath);
+      fs.mkdirSync(dir, { recursive: true });
+      const tmp = path.join(dir, `${path.basename(filePath)}.tmp`);
+      fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), "utf8");
+      fs.renameSync(tmp, filePath);
       return true;
-    } catch (e) {
-      console.warn("Fallback write also failed:", e.message);
-      return false;
+    } catch (err) {
+      lastError = err;
+      try {
+        const dir = path.dirname(filePath);
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(filePath, JSON.stringify(obj, null, 2), "utf8");
+        return true;
+      } catch (e) {
+        lastError = e;
+      }
     }
   }
+
+  console.warn("Fallback DB write failed on all writable paths:", lastError?.message || "unknown error");
+  return false;
 };
 
 const getPakistanDateKey = (value) => {
@@ -657,7 +674,9 @@ router.post(
       }
 
       const ok = writeFallbackDbFile(fallbackDb);
-      if (!ok) return res.status(500).json({ success: false, message: "Failed to persist product" });
+      if (!ok) {
+        console.warn("Product was created in memory but fallback persistence failed. This is expected on Vercel/serverless where the filesystem is ephemeral.");
+      }
       return res.status(201).json({ success: true, product: newProduct, message: "Product added to fallback DB" });
     } catch (err) {
       console.error("add-fallback error:", err);

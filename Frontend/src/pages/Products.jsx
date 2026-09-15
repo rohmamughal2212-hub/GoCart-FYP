@@ -5,8 +5,16 @@ import { ProductSkeletonGrid } from "../components/Loading";
 import { useAppContext } from "../context/AppContext";
 import { categories as CATEGORY_LIST } from "../assets/assets";
 
-// Only show products from these 8 categories
-const ALLOWED_CATEGORIES = ["Electronics", "Sports", "Grocery", "Meat", "Beauty", "Kitchen", "Garments", "Baby"];
+const ALLOWED_CATEGORIES = [
+  "Electronics",
+  "Sports",
+  "Grocery",
+  "Meat",
+  "Beauty",
+  "Kitchen",
+  "Garments",
+  "Baby Items",
+];
 const matchesCategory = (productCategory, categoryKey) => {
   const productValue = (productCategory || "").toString().toLowerCase().trim();
   const selectedValue = (categoryKey || "").toString().toLowerCase().trim();
@@ -237,7 +245,7 @@ export default function Products() {
       const allProducts = Array.isArray(data.products) ? data.products : [];
 
       let filtered = allProducts.filter((p) => {
-        if (!ALLOWED_CATEGORIES.some((category) => matchesCategory(p.category, category))) return false;
+        if (ALLOWED_CATEGORIES.length && !ALLOWED_CATEGORIES.some((category) => matchesCategory(p.category, category))) return false;
 
         if (appliedCategories.length) {
           const matchedCategory = appliedCategories.some((cat) =>

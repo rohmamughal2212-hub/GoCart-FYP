@@ -34,9 +34,9 @@ const Footer = () => {
         <div className="max-w-80">
           <div className="flex items-center gap-2 mb-3">
             <svg viewBox="0 0 38 32" className="w-8 h-8" fill="none">
-              <path d="M2 2h5l3.5 17.5a2.5 2.5 0 002.5 2H29a2.5 2.5 0 002.45-2L34 9H10" stroke="#1B3A6B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="14" cy="28" r="2" fill="#1B3A6B"/>
-              <circle cx="27" cy="28" r="2" fill="#1B3A6B"/>
+              <path d="M2 2h5l3.5 17.5a2.5 2.5 0 002.5 2H29a2.5 2.5 0 002.45-2L34 9H10" stroke="#1B3A6B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="14" cy="28" r="2" fill="#1B3A6B" />
+              <circle cx="27" cy="28" r="2" fill="#1B3A6B" />
             </svg>
             <span className="text-2xl font-bold tracking-tight">
               <span style={{ color: "#1B3A6B" }}>Go</span><span className="text-gray-900">Cart</span>
@@ -80,9 +80,6 @@ const Footer = () => {
             </li>
             <li>
               <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-            </li>
-            <li>
-              <a href="/refund" target="_blank" rel="noopener noreferrer">Refund Policy</a>
             </li>
           </ul>
         </div>

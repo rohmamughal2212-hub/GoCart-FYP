@@ -1,4 +1,3 @@
-import Stripe from "stripe";
 import mongoose from "mongoose";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
@@ -7,7 +6,6 @@ import { sendEmail, orderConfirmationEmail } from "../config/email.js";
 import User from "../models/user.model.js";
 import { decrementProductStockFallback, findProductByIdFallback } from "../config/fallbackDb.js";
 
-const getStripe = () => new Stripe(process.env.STRIPE_SECRET_KEY);
 const SHIPPING_CHARGE = 250;
 
 const createStockError = (message, status = 400) => {
@@ -145,99 +143,6 @@ export const placeOrderCOD = async (req, res) => {
   } catch (error) {
     console.error("placeOrderCOD error:", error);
     res.status(error.status || 500).json({ success: false, message: error.status ? error.message : "Failed to place order", error: error.message });
-  }
-};
-
-// POST /api/order/stripe
-export const placeOrderStripe = async (req, res) => {
-  try {
-    const userId = req.user;
-    const { items, address } = req.body;
-
-    if (!address || !items || items.length === 0)
-      return res.status(400).json({ success: false, message: "Items and address are required" });
-
-    const { products } = await validateOrderStock(items);
-    let amount = 0;
-    const lineItems = [];
-    for (const item of items) {
-      const product = products.get(String(item.product?._id || item.product));
-      const unitPrice = Number(product.offerPrice || product.price || 0);
-      amount += unitPrice * item.quantity;
-      lineItems.push({
-        price_data: {
-          currency: "pkr",
-          product_data: { name: product.name },
-          unit_amount: Math.round(unitPrice * 100),
-        },
-        quantity: item.quantity,
-      });
-    }
-    amount = Math.floor(amount + SHIPPING_CHARGE);
-    lineItems.push({
-      price_data: {
-        currency: "pkr",
-        product_data: { name: "Shipping" },
-        unit_amount: SHIPPING_CHARGE * 100,
-      },
-      quantity: 1,
-    });
-
-    // Create pending order first
-    const order = await Order.create({ userId, items, address, amount, paymentType: "Online", isPaid: false, isStockDeducted: false });
-
-    const frontendBaseUrl = String(process.env.FRONTEND_URL || "http://127.0.0.1:5173").replace(/^"|"$/g, "").replace(/\/$/, "");
-    const session = await getStripe().checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: lineItems,
-      mode: "payment",
-      success_url: `${frontendBaseUrl}/my-orders?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${frontendBaseUrl}/cart?payment=cancelled`,
-      metadata: { orderId: order._id.toString(), userId },
-    });
-
-    res.status(200).json({ success: true, sessionUrl: session.url, orderId: order._id });
-  } catch (error) {
-    console.error("placeOrderStripe error:", error);
-    res.status(error.status || 500).json({ success: false, message: error.status ? error.message : "Failed to create payment session", error: error.message });
-  }
-};
-
-// POST /api/order/stripe/verify
-export const verifyStripePayment = async (req, res) => {
-  try {
-    const { sessionId } = req.body;
-    const session = await getStripe().checkout.sessions.retrieve(sessionId);
-
-    if (session.payment_status === "paid") {
-      let order = await Order.findById(session.metadata.orderId);
-      if (!order) return res.status(404).json({ success: false, message: "Order not found" });
-      if (!order.isStockDeducted) {
-        await decrementOrderStock(order.items);
-        order = await Order.findByIdAndUpdate(
-          session.metadata.orderId,
-          { isPaid: true, status: "Order Placed", isStockDeducted: true },
-          { new: true },
-        );
-      } else {
-        order = await Order.findByIdAndUpdate(
-          session.metadata.orderId,
-          { isPaid: true, status: "Order Placed" },
-          { new: true },
-        );
-      }
-      await User.findByIdAndUpdate(session.metadata.userId, { cartItems: {} });
-
-      const user = await User.findById(session.metadata.userId);
-      const receiptOrder = await prepareOrderReceipt(order);
-      sendEmail({ to: user.email, ...orderConfirmationEmail(user.name, receiptOrder) }).catch(console.error);
-
-      return res.status(200).json({ success: true, message: "Payment verified" });
-    }
-    res.status(400).json({ success: false, message: "Payment not completed" });
-  } catch (error) {
-    console.error("verifyStripePayment error:", error);
-    res.status(error.status || 500).json({ success: false, message: error.status ? error.message : "Payment verification failed", error: error.message });
   }
 };
 
