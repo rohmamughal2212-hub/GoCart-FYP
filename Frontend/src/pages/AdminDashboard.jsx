@@ -3,6 +3,7 @@ import { useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import AdminProfileModal from "../components/AdminProfileModal";
 import { categories } from "../assets/assets";
+import { categoryMatches } from "../utils/categoryMatch";
 import toast from "react-hot-toast";
 
 const Icon = ({ name, size = 20, strokeWidth = 1.8 }) => {
@@ -88,7 +89,22 @@ const ReceiptModal = ({ order, receiptType, setReceiptType, onClose, onPrint, on
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { axios, products, fetchProducts } = useAppContext();
+  const { axios, products } = useAppContext();
+
+  const groupAdminProducts = (adminProducts = []) => categories.slice(0, 8).map((category) => [
+    category.text,
+    adminProducts.filter((product) => categoryMatches(product.category, category.path)),
+  ]);
+
+  const fetchAdminProducts = async () => {
+    const { data } = await axios.get("/api/admin/products", {
+      params: { _t: Date.now() },
+    });
+    if (!data?.success || !Array.isArray(data.products)) {
+      throw new Error(data?.message || "Invalid products response from server");
+    }
+    return data.products;
+  };
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminUser, setAdminUser] = useState({ name: "Admin", email: "" });
@@ -268,10 +284,19 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (activeView === "users") fetchUsers();
     if (activeView === "orders" || activeView === "receipts") fetchOrders();
-    if (activeView === "products") fetchProducts();
+    if (activeView === "products") {
+      fetchAdminProducts()
+        .then((adminProducts) => setProductCategories(groupAdminProducts(adminProducts)))
+        .catch((error) => {
+          console.error("Failed to load admin products:", error);
+          const message = error.response?.data?.message || error.message || "Failed to load products";
+          toast.error(message);
+        });
+    }
   }, [activeView]);
 
   useEffect(() => {
+    if (activeView === "products") return;
     const groups = products.reduce((acc, product) => {
       const category = product.category || "Uncategorized";
       acc[category] = acc[category] || [];
@@ -443,7 +468,8 @@ const AdminDashboard = () => {
         );
 
         toast.success("Product updated");
-        await fetchProducts();
+        const refreshedProducts = await fetchAdminProducts();
+        setProductCategories(groupAdminProducts(refreshedProducts));
         closeProductEditor();
       } else {
         toast.error(data?.message || "Failed to update product");
@@ -528,7 +554,8 @@ const AdminDashboard = () => {
         setShowAddProductModal(false);
         setNewProduct({ name: "", description: "", category: "", price: "", offerPrice: "", stock: 10, images: [] });
         setImagePreview(null);
-        await fetchProducts();
+        const refreshedProducts = await fetchAdminProducts();
+        setProductCategories(groupAdminProducts(refreshedProducts));
       } else {
         toast.error(data?.message || "Failed to add product");
       }
@@ -544,7 +571,8 @@ const AdminDashboard = () => {
       const { data } = await axios.delete(`/api/admin/products/${id}`);
       if (data?.success) {
         toast.success("Product deleted");
-        await fetchProducts();
+        const refreshedProducts = await fetchAdminProducts();
+        setProductCategories(groupAdminProducts(refreshedProducts));
       } else {
         toast.error(data?.message || "Delete failed");
       }

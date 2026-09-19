@@ -5,6 +5,7 @@ import { categories as CATEGORY_LIST, dummyProducts, electronicsProducts } from 
 import ProductCard from "../components/ProductCard";
 import { ProductSkeletonGrid } from "../components/Loading";
 import { useAppContext } from "../context/AppContext";
+import { categoryMatches, normalizeCategoryText } from "../utils/categoryMatch";
 
 const EXCLUDED_PRODUCT_IDS = new Set(["da8498941205efd19d8743db"]);
 const ALLOWED_CATEGORIES = new Set([
@@ -35,8 +36,8 @@ export default function ProductCategory() {
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
 
-  const catInfo = CATEGORY_LIST.find((c) => c.path.toLowerCase() === category);
-  const categoryKey = (catInfo?.path || category).toLowerCase().trim();
+  const catInfo = CATEGORY_LIST.find((c) => categoryMatches(c.path, category));
+  const categoryKey = normalizeCategoryText(catInfo?.path || category);
 
   useEffect(() => {
     setLoading(true);
@@ -50,8 +51,7 @@ export default function ProductCategory() {
           const apiProducts = data.products.filter((product) => !isExcludedProduct(product));
           const catKey = categoryKey;
           const localMatches = (ctxProducts || []).filter(
-            (p) => ((p.category || "").toString().toLowerCase().trim() === catKey)
-              && !isExcludedProduct(p)
+            (p) => categoryMatches(p.category, catKey) && !isExcludedProduct(p)
           );
           const mergedMap = new Map();
           apiProducts.forEach((p) => mergedMap.set(p._id, p));
@@ -65,7 +65,7 @@ export default function ProductCategory() {
           const list = ALLOWED_CATEGORIES.has(catKey) && catKey === "electronics"
             ? electronicsProducts
             : ALLOWED_CATEGORIES.has(catKey)
-              ? dummyProducts.filter((p) => (p.category || "").toLowerCase() === catKey)
+              ? dummyProducts.filter((p) => categoryMatches(p.category, catKey))
               : [];
           setProducts(list);
           setTotal(list.length);
@@ -78,7 +78,7 @@ export default function ProductCategory() {
         const list = ALLOWED_CATEGORIES.has(catKey) && catKey === "electronics"
           ? electronicsProducts
           : ALLOWED_CATEGORIES.has(catKey)
-            ? dummyProducts.filter((p) => (p.category || "").toLowerCase() === catKey)
+            ? dummyProducts.filter((p) => categoryMatches(p.category, catKey))
             : [];
         setProducts(list);
         setTotal(list.length);

@@ -4,6 +4,7 @@ import ProductCard from "../components/ProductCard";
 import { ProductSkeletonGrid } from "../components/Loading";
 import { useAppContext } from "../context/AppContext";
 import { categories as CATEGORY_LIST } from "../assets/assets";
+import { categoryMatches } from "../utils/categoryMatch";
 
 const ALLOWED_CATEGORIES = [
   "Electronics",
@@ -15,11 +16,7 @@ const ALLOWED_CATEGORIES = [
   "Garments",
   "Baby Items",
 ];
-const matchesCategory = (productCategory, categoryKey) => {
-  const productValue = (productCategory || "").toString().toLowerCase().trim();
-  const selectedValue = (categoryKey || "").toString().toLowerCase().trim();
-  return productValue === selectedValue || productValue.includes(selectedValue);
-};
+const matchesCategory = (productCategory, categoryKey) => categoryMatches(productCategory, categoryKey);
 
 const PAGE_SIZE = 12;
 const SORT_OPTIONS = [

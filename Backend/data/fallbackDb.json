@@ -385,8 +385,8 @@
       "inStock": true,
       "image": [],
       "description": [],
-      "stock": 7,
-      "updatedAt": "2026-09-09T08:20:44.208Z"
+      "stock": 19,
+      "updatedAt": "2026-09-19T13:35:08.230Z"
     },
     {
       "_id": "sp01a99k",
@@ -399,8 +399,8 @@
         "/images/custom_yoga_mat.png"
       ],
       "description": [],
-      "stock": 10,
-      "updatedAt": "2026-09-13T15:55:48.316Z"
+      "stock": 9,
+      "updatedAt": "2026-09-19T13:35:08.234Z"
     },
     {
       "name": "Eggs Dozen",
@@ -473,9 +473,116 @@
       "_id": "4b5c3bf95ea264e73033a093",
       "stock": 10,
       "updatedAt": "2026-09-13T16:43:23.688Z"
+    },
+    {
+      "name": "Rose Perfume Spray 50ml",
+      "category": "Beauty",
+      "price": 1750,
+      "offerPrice": 1499,
+      "inStock": true,
+      "image": [
+        "/images/rose-perfume-spray-50ml.png"
+      ],
+      "description": [
+        "Fresh floral scent",
+        "Fine mist spray",
+        "Lasts all day"
+      ],
+      "_id": "4f8ada4e58347cb932daccc6",
+      "stock": 10,
+      "updatedAt": "2026-09-19T13:26:52.191Z"
+    },
+    {
+      "name": "Glow Face Wash 200ml",
+      "category": "Beauty",
+      "price": 730,
+      "offerPrice": 670,
+      "inStock": true,
+      "image": [
+        "/images/glow-face-wash-200ml.png"
+      ],
+      "description": [
+        "Brightening formula",
+        "Gentle daily cleanser",
+        "Leaves skin refreshed"
+      ],
+      "_id": "027bf21dd4001b75e831ee0e",
+      "stock": 10,
+      "updatedAt": "2026-09-19T13:28:50.304Z"
+    },
+    {
+      "name": "Silk Lipstick Set",
+      "category": "Beauty",
+      "price": 1399,
+      "offerPrice": 1199,
+      "inStock": true,
+      "image": [
+        "/images/silk-lipstick-set.png"
+      ],
+      "description": [
+        "Long-lasting color",
+        "Smooth satin finish",
+        "Includes 3 shades"
+      ],
+      "_id": "82a13ac321bec392309dcff2",
+      "stock": 10,
+      "updatedAt": "2026-09-19T13:28:56.059Z"
+    },
+    {
+      "name": "Keratin Hair Serum 100ml",
+      "category": "Beauty",
+      "price": 1580,
+      "offerPrice": 1370,
+      "inStock": true,
+      "image": [
+        "/images/keratin-hair-serum-100ml.png"
+      ],
+      "description": [
+        "Smoothens frizz",
+        "Adds shine",
+        "Easy application"
+      ],
+      "_id": "fd48714eaf296b01d2325fef",
+      "stock": 10,
+      "updatedAt": "2026-09-19T13:28:59.960Z"
+    },
+    {
+      "name": "Vitamin C Facial Cleanser 150ml",
+      "category": "Beauty",
+      "price": 635,
+      "offerPrice": 580,
+      "inStock": true,
+      "image": [
+        "/images/vitamin-c-facial-cleanser-150ml.png"
+      ],
+      "description": [
+        "Brightens skin tone",
+        "Gentle foaming cleanser",
+        "Packed with vitamin C"
+      ],
+      "_id": "2e6f3704fac121bdea761e63",
+      "stock": 10,
+      "updatedAt": "2026-09-19T13:29:04.460Z"
+    },
+    {
+      "_id": "el01a01e",
+      "name": "Wireless Noise Cancelling Headphones",
+      "category": "Electronics",
+      "price": 3500,
+      "offerPrice": 2200,
+      "inStock": true,
+      "image": [
+        "/images/custom_headphones.png"
+      ],
+      "description": [
+        "Immersive sound with active noise cancellation",
+        "Up to 30 hours of playback",
+        "Soft ear cushions for all-day comfort"
+      ],
+      "stock": 10,
+      "updatedAt": "2026-09-19T13:32:55.937Z"
     }
   ],
-  "orders": [],
   "addresses": [
     {
       "_id": "2",
@@ -490,5 +597,9 @@
       "country": "Pakistan",
       "phone": "1234567890"
     }
-  ]
+  ],
+  "orders": [],
+  "reviews": [],
+  "newsletters": [],
+  "nextId": 1
 }

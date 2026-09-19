@@ -691,4 +691,5 @@ export {
   findFallbackNewsletter,
   createFallbackNewsletter,
   updateFallbackNewsletter,
+  loadLocalProductsWithIds,
 };

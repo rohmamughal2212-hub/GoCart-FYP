@@ -2,15 +2,19 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { categoryMatches } from "../utils/categoryMatch";
 
 axios.defaults.withCredentials = true;
 const getBackendBaseUrl = () => {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const isLocalHostname = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
+    const isPrivateIpv4 = /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(hostname);
+    if (isLocalHostname || isPrivateIpv4) return `http://${hostname}:5000`;
+  }
+
   const configured = import.meta.env.VITE_BACKEND_URL?.replace(/^"|"$/g, "");
   if (configured) return configured;
-
-  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "0.0.0.0")) {
-    return "http://localhost:5000";
-  }
 
   return "https://gocart-api.vercel.app";
 };
@@ -121,9 +125,7 @@ export const AppContextProvider = ({ children }) => {
       if (data && data.success) {
         const filtered = ALLOWED_CATEGORIES.length
           ? (data.products || []).filter((p) =>
-            ALLOWED_CATEGORIES.some((cat) =>
-              (p.category || "").toString().toLowerCase().includes(cat.toLowerCase())
-            )
+            ALLOWED_CATEGORIES.some((cat) => categoryMatches(p.category, cat))
           )
           : (data.products || []);
         setProducts(filtered);

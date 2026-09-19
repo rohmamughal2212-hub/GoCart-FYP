@@ -43,6 +43,19 @@ const allowedOrigins = [
 const isAllowedOrigin = (origin) => (
   allowedOrigins.includes(origin)
   || origin === "https://gocart-fyp.vercel.app"
+  || (() => {
+    try {
+      const url = new URL(origin);
+      const isDevPort = url.port === "5173";
+      const isLocalHostname = url.hostname === "localhost"
+        || url.hostname === "127.0.0.1"
+        || url.hostname === "0.0.0.0";
+      const isPrivateIpv4 = /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(url.hostname);
+      return isDevPort && (isLocalHostname || isPrivateIpv4);
+    } catch {
+      return false;
+    }
+  })()
 );
 
 app.use((req, res, next) => {

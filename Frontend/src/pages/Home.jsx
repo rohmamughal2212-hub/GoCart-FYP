@@ -4,6 +4,8 @@ import TrendingCarousel from "../components/TrendingCarousel";
 import ProductCard from "../components/ProductCard";
 import { useAppContext } from "../context/AppContext";
 import { Link } from "react-router-dom";
+import { categories } from "../assets/assets";
+import { categoryMatches } from "../utils/categoryMatch";
 
 const features = [
   { icon: "🚚", title: "Quick Delivery", desc: "On all orders, every day" },
@@ -18,8 +20,7 @@ const Home = () => {
   // Helper function to get products by category
   const getProductsByCategory = (categoryName) => {
     return products
-      .filter((p) => (p.category || "").toString().toLowerCase().includes(categoryName.toLowerCase()))
-      .filter((p) => p.inStock)
+      .filter((p) => categoryMatches(p.category, categoryName))
       .slice(0, 5);
   };
 
@@ -73,7 +74,16 @@ const Home = () => {
       {/* Trending Products Carousel */}
       <TrendingCarousel />
 
-      {/* Individual category sections removed per request (keeping categories grid above) */}
+      {/* Show each homepage category with its own products. */}
+      <div className="mt-4">
+        {categories.slice(0, 8).map((category) => (
+          <CategorySection
+            key={category.path}
+            categoryName={category.path}
+            title={category.text}
+          />
+        ))}
+      </div>
 
       {/* Best Products section removed per request */}
     </div>

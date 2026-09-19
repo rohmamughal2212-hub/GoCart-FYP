@@ -4,7 +4,7 @@ import User from "../models/user.model.js";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
 import Address from "../models/address.model.js";
-import { findProductByIdFallback } from "../config/fallbackDb.js";
+import { findProductByIdFallback, loadLocalProductsWithIds } from "../config/fallbackDb.js";
 import { dbAvailable } from "../config/connectDB.js";
 import fs from "fs";
 import path from "path";
@@ -263,6 +263,32 @@ router.get("/stats", async (req, res) => {
   }
 });
 
+// Admin product catalog: return every manageable product without public filters.
+router.get("/products", async (req, res) => {
+  try {
+    loadFallbackDb();
+    const localProducts = loadLocalProductsWithIds();
+    let products = [];
+
+    if (isMongoReady()) {
+      products = await Product.find({}).sort({ updatedAt: -1, createdAt: -1 }).lean();
+    }
+
+    const seen = new Set();
+    const mergedProducts = [...products, ...fallbackDb.products, ...localProducts].filter((product) => {
+      const identity = `${String(product?.category || "").trim().toLowerCase()}|${String(product?.name || "").trim().toLowerCase()}`;
+      if (!identity || seen.has(identity)) return false;
+      seen.add(identity);
+      return true;
+    });
+
+    return res.json({ success: true, products: mergedProducts });
+  } catch (error) {
+    console.error("Error fetching admin products:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Get list of users (fallback or DB)
 router.get("/users", async (req, res) => {
   try {
@@ -481,7 +507,8 @@ const updateFallbackProduct = (id, updateFields) => {
 const updateFallbackProductByName = (name, updateFields) => {
   if (!name) return null;
   loadFallbackDb();
-  const index = fallbackDb.products.findIndex((p) => String(p.name || "").trim() === String(name).trim());
+  const normalizedName = String(name).trim().toLowerCase();
+  const index = fallbackDb.products.findIndex((p) => String(p.name || "").trim().toLowerCase() === normalizedName);
   if (index === -1) return null;
   fallbackDb.products[index] = {
     ...fallbackDb.products[index],
@@ -490,6 +517,22 @@ const updateFallbackProductByName = (name, updateFields) => {
   };
   writeFallbackDbFile(fallbackDb);
   return fallbackDb.products[index];
+};
+
+const findProductByIdOrName = (productId, productName) => {
+  loadFallbackDb();
+  const normalizedId = String(productId || "").trim();
+  const normalizedName = String(productName || "").trim();
+
+  const product = fallbackDb.products.find((p) => {
+    const candidateId = String(p._id || p.id || "").trim();
+    const candidateName = String(p.name || "").trim();
+    const sameId = normalizedId && candidateId === normalizedId;
+    const sameName = normalizedName && candidateName.toLowerCase() === normalizedName.toLowerCase();
+    return sameId || sameName;
+  });
+
+  return product || null;
 };
 
 router.put("/products/:id", async (req, res) => {
@@ -521,13 +564,13 @@ router.put("/products/:id", async (req, res) => {
       }
 
       const fallbackProduct = updateFallbackProduct(id, updateFields);
-      const matchedProduct = fallbackProduct || updateFallbackProductByName(name, updateFields);
+      const matchedProduct = fallbackProduct || updateFallbackProductByName(name, updateFields) || findProductByIdOrName(id, name);
       if (!matchedProduct) return res.status(404).json({ success: false, message: "Product not found" });
       return res.json({ success: true, product: matchedProduct });
     }
 
     const product = updateFallbackProduct(id, updateFields);
-    const matchedProduct = product || updateFallbackProductByName(name, updateFields);
+    const matchedProduct = product || updateFallbackProductByName(name, updateFields) || findProductByIdOrName(id, name);
     if (!matchedProduct) return res.status(404).json({ success: false, message: "Product not found" });
     return res.json({ success: true, product: matchedProduct });
   } catch (error) {
@@ -556,10 +599,10 @@ router.delete("/products/:id", async (req, res) => {
     const before = fallbackDb.products.length;
     fallbackDb.products = fallbackDb.products.filter((p) => {
       const productId = String(p._id || p.id || "");
-      if (productId === String(id)) return false;
-      if (!identityToDelete) return true;
       const currentIdentity = `${String(p.category || "").trim().toLowerCase()}|${String(p.name || "").trim().toLowerCase()}`;
-      return currentIdentity !== identityToDelete;
+      const sameId = productId === String(id);
+      const sameIdentity = !!identityToDelete && currentIdentity === identityToDelete;
+      return !(sameId || sameIdentity);
     });
 
     if (fallbackDb.products.length < before) {

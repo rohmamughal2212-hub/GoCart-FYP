@@ -173,16 +173,50 @@ export const addProduct = async (req, res) => {
 //   sort        – featured | price_asc | price_desc | name_asc | newest
 //   page        – page number (default 1)
 //   limit       – items per page (default 12; pass 0 for all)
-const APPROVED_PUBLIC_CATEGORIES = [
-  "Electronics",
-  "Sports",
-  "Grocery",
-  "Meat",
-  "Beauty",
-  "Kitchen",
-  "Garments",
-  "Baby Items",
-];
+const CATEGORY_ALIASES = {
+  Electronics: ["electronics"],
+  Sports: ["sports"],
+  Grocery: ["grocery"],
+  Meat: ["meat"],
+  Beauty: ["beauty", "beauty and care"],
+  Kitchen: ["kitchen", "home", "home and kitchen"],
+  Garments: ["garments", "fashion"],
+  "Baby Items": ["baby", "baby items", "baby care"],
+  Computers: ["computers", "computer"],
+  Books: ["books"],
+  Toys: ["toys", "toys and games"],
+};
+
+const normalizeCategoryText = (value = "") => String(value ?? "")
+  .trim()
+  .toLowerCase()
+  .replace(/[_-]+/g, " ")
+  .replace(/&/g, " and ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const APPROVED_PUBLIC_CATEGORIES = Object.keys(CATEGORY_ALIASES);
+
+const categoryMatches = (productCategory, categoryKey) => {
+  const productValue = normalizeCategoryText(productCategory);
+  const selectedValue = normalizeCategoryText(categoryKey);
+
+  if (!productValue || !selectedValue) return false;
+  if (productValue === selectedValue || productValue.includes(selectedValue) || selectedValue.includes(productValue)) {
+    return true;
+  }
+
+  const categoryAliasMap = Object.entries(CATEGORY_ALIASES);
+  const canonicalTarget = categoryAliasMap.find(([canonicalName, aliases]) => {
+    const aliasSet = new Set(aliases.map((alias) => normalizeCategoryText(alias)));
+    return aliasSet.has(selectedValue) || normalizeCategoryText(canonicalName) === selectedValue;
+  });
+
+  if (!canonicalTarget) return false;
+  const canonicalAliases = new Set(canonicalTarget[1].map((alias) => normalizeCategoryText(alias)));
+  canonicalAliases.add(normalizeCategoryText(canonicalTarget[0]));
+  return canonicalAliases.has(productValue);
+};
 
 const normalizeProductPayload = (product) => {
   if (!product) return product;
@@ -206,9 +240,9 @@ const normalizeProductPayload = (product) => {
 
 const isApprovedPublicCategory = (productCategory) => {
   const categoryValue = String(productCategory || "").trim();
-  return APPROVED_PUBLIC_CATEGORIES.some(
-    (category) => categoryValue.toLowerCase() === category.toLowerCase() || categoryValue.toLowerCase().includes(category.toLowerCase()),
-  );
+  if (!categoryValue) return false;
+
+  return APPROVED_PUBLIC_CATEGORIES.some((category) => categoryMatches(categoryValue, category));
 };
 
 const sanitizePublicCatalog = (products = []) => {
@@ -256,7 +290,9 @@ export const getProducts = async (req, res) => {
     const selectedCategories = (categories || String(APPROVED_PUBLIC_CATEGORIES.join(","))).split(",").map((value) => value.trim()).filter(Boolean);
     const filteredCategories = selectedCategories.length ? selectedCategories : APPROVED_PUBLIC_CATEGORIES;
     if (!categories || !categories.trim()) {
-      query.category = { $in: filteredCategories.map((value) => new RegExp(value, "i")) };
+      query.category = {
+        $in: filteredCategories.map((value) => new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")),
+      };
     }
 
     // Text search
@@ -269,11 +305,11 @@ export const getProducts = async (req, res) => {
       const catArray = categories
         .split(",")
         .map((c) => c.trim())
-        .filter(Boolean);
+        .filter(Boolean)
+        .map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
       if (catArray.length) {
-        // Use substring, case-insensitive match so 'Baby' matches 'Baby Items'
         query.category = {
-          $in: catArray.map((cat) => new RegExp(`${cat}`, "i")),
+          $in: catArray.map((cat) => new RegExp(cat, "i")),
         };
       }
     }
@@ -324,6 +360,14 @@ export const getProducts = async (req, res) => {
       return `${category}|${name}`;
     };
 
+    const productVersionScore = (product = {}) => {
+      const stockValue = Number(product.stock ?? (product.inStock ? 1 : 0) ?? 0);
+      const updatedAt = Date.parse(product.updatedAt || product.createdAt || "1970-01-01T00:00:00.000Z");
+      const priceValue = Number(product.offerPrice ?? product.price ?? 0);
+      const imageValue = Array.isArray(product.image) && product.image.length > 0 ? 1 : 0;
+      return ((Number.isFinite(updatedAt) ? updatedAt : 0) * 10) + (stockValue * 1000) + (priceValue * 0.01) + imageValue;
+    };
+
     const dedupeProducts = (items = []) => {
       const unique = new Map();
 
@@ -336,7 +380,16 @@ export const getProducts = async (req, res) => {
         };
 
         const key = buildProductIdentity(normalized);
-        if (!unique.has(key)) unique.set(key, normalized);
+        const existing = unique.get(key);
+
+        if (!existing) {
+          unique.set(key, normalized);
+          return;
+        }
+
+        if (productVersionScore(normalized) > productVersionScore(existing)) {
+          unique.set(key, normalized);
+        }
       });
 
       return [...unique.values()];

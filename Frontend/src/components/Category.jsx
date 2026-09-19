@@ -1,5 +1,6 @@
 import { categories } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
+import { categoryMatches } from "../utils/categoryMatch";
 
 const APPROVED_PUBLIC_CATEGORIES = [
   "Electronics",
@@ -23,8 +24,7 @@ const Category = () => {
   const counts = (categories || []).slice(0, 8).map((category) => {
     const catKey = (category.path || category.text || "").toString().toLowerCase().trim();
     const cnt = publicProducts.reduce((acc, p) => {
-      const productCategory = (p.category || "").toString().toLowerCase().trim();
-      return acc + (productCategory.includes(catKey) ? 1 : 0);
+      return acc + (categoryMatches(p.category, catKey) ? 1 : 0);
     }, 0);
     return cnt;
   });
