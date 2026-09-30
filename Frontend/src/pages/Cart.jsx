@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import { assets, dummyProducts, electronicsProducts } from "../assets/assets";
 import toast from "react-hot-toast";
@@ -15,6 +16,9 @@ const Cart = () => {
     removeFromCart, updateCartItem,
     axios, user, setShowUserLogin,
   } = useAppContext();
+  const location = useLocation();
+  const autoOrderStarted = useRef(false);
+  const placeOrderRef = useRef(null);
 
   const [cartArray, setCartArray] = useState([]);
   const [address, setAddress] = useState([]);
@@ -53,16 +57,16 @@ const Cart = () => {
   const hasUnavailableItems = cartArray.some((product) => !isProductInStock(product));
 
   /* ── place order ── */
-  const placeOrder = async () => {
+  const placeOrder = async (addressOverride = selectedAddress) => {
     if (!user) { setShowUserLogin(true); return; }
-    if (!selectedAddress) return toast.error("Please select a delivery address");
+    if (!addressOverride) return toast.error("Please select a delivery address");
     setPlacing(true);
     try {
       const orderItems = Object.entries(cartItems).map(([product, quantity]) => ({
         product,
         quantity: Number(quantity),
       }));
-      const addressId = selectedAddress?._id || selectedAddress?.id || selectedAddress;
+      const addressId = addressOverride?._id || addressOverride?.id || addressOverride;
       const { data } = await axios.post("/api/order/cod", {
         items: orderItems,
         address: addressId,
@@ -79,6 +83,14 @@ const Cart = () => {
       toast.error(err.response?.data?.message || err.message);
     } finally { setPlacing(false); }
   };
+
+  placeOrderRef.current = placeOrder;
+
+  useEffect(() => {
+    if (!location.state?.chatbotAutoOrder || !address.length || autoOrderStarted.current) return;
+    autoOrderStarted.current = true;
+    placeOrderRef.current?.(address[0]);
+  }, [address, location.state]);
 
   /* ── empty cart ── */
   if (cartCount() === 0) {

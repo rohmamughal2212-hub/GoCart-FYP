@@ -152,26 +152,28 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
-  const addToCart = (itemId) => {
+  const addToCart = (itemId, quantity = 1) => {
     const product = products.find((item) => String(item._id) === String(itemId));
+    const amount = Math.max(1, Math.floor(Number(quantity) || 1));
     const hasStock = product && (product.stock !== undefined && product.stock !== null
       ? Number(product.stock) > 0
       : product.inStock !== false);
     if (product && !hasStock) {
       toast.error("This product is out of stock");
-      return;
+      return false;
     }
     const availableStock = product && product.stock !== undefined && product.stock !== null
       ? Math.max(0, Math.floor(Number(product.stock)))
       : null;
-    if (availableStock !== null && (cartItems[itemId] || 0) >= availableStock) {
+    if (availableStock !== null && (cartItems[itemId] || 0) + amount > availableStock) {
       toast.error(`Only ${availableStock} available`);
-      return;
+      return false;
     }
     const cart = { ...cartItems };
-    cart[itemId] = (cart[itemId] || 0) + 1;
+    cart[itemId] = (cart[itemId] || 0) + amount;
     setCartItems(cart);
-    toast.success("Added to cart");
+    toast.success(amount === 1 ? "Added to cart" : `Added ${amount} to cart`);
+    return true;
   };
 
   const updateCartItem = (itemId, quantity) => {

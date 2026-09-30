@@ -65,6 +65,7 @@ const SidebarFilters = ({
   draftPriceMin, onPriceMinChange,
   draftPriceMax, onPriceMaxChange,
   draftInStock, onInStockChange,
+  catalogProducts, catalogLoading,
   meta,
   onClearAll,
   chips,
@@ -104,21 +105,19 @@ const SidebarFilters = ({
           <span className="text-sm text-gray-600 group-hover:text-indigo-600 transition-colors flex-1">All Categories</span>
         </label>
         {CATEGORY_LIST.slice(0, 8).map((cat) => {
-          const categoryKey = cat.path.toLowerCase();
-          const counts = Object.entries(meta.categoryCounts).reduce(
-            (total, [name, value]) => name.toLowerCase().includes(categoryKey)
-              ? { total: total.total + value.total, inStock: total.inStock + value.inStock }
-              : total,
-            { total: 0, inStock: 0 },
-          );
-          const count = counts ? (draftInStock ? counts.inStock : counts.total) : 0;
+          const count = catalogProducts.filter((product) =>
+            matchesCategory(product.category, cat.path) &&
+            (!draftInStock || product.inStock === true)
+          ).length;
           return (
             <label key={cat.path} className="flex items-center gap-2.5 cursor-pointer group">
               <input type="checkbox" checked={draftCategories.includes(cat.path)}
                 onChange={() => onToggleCategory(cat.path)}
                 className="w-4 h-4 rounded border-gray-300 accent-indigo-500 cursor-pointer" />
               <span className="text-sm text-gray-600 group-hover:text-indigo-600 transition-colors flex-1">{cat.text}</span>
-              <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">{count}</span>
+              <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                {catalogLoading ? "..." : count}
+              </span>
             </label>
           );
         })}
@@ -185,7 +184,12 @@ const SidebarFilters = ({
    MAIN PAGE COMPONENT
    ════════════════════════════════════════════════════════════════ */
 export default function Products() {
-  const { searchQuery, setSearchQuery } = useAppContext();
+  const {
+    searchQuery,
+    setSearchQuery,
+    products: catalogProducts = [],
+    productsLoading: catalogLoading,
+  } = useAppContext();
 
   /* Draft (editing) state */
   const [draftCategories, setDraftCategories] = useState([]);
@@ -394,6 +398,7 @@ export default function Products() {
     draftPriceMin, onPriceMinChange: setDraftPriceMin,
     draftPriceMax, onPriceMaxChange: setDraftPriceMax,
     draftInStock, onInStockChange: handleStockChange,
+    catalogProducts, catalogLoading,
     meta, hasPending, onApply: applyFilters, onClearAll: clearAll, chips,
   };
 

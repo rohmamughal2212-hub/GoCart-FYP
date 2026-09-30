@@ -1,11 +1,6 @@
 import HeroSlider from "../components/HeroSlider";
 import Category from "../components/Category";
 import TrendingCarousel from "../components/TrendingCarousel";
-import ProductCard from "../components/ProductCard";
-import { useAppContext } from "../context/AppContext";
-import { Link } from "react-router-dom";
-import { categories } from "../assets/assets";
-import { categoryMatches } from "../utils/categoryMatch";
 
 const features = [
   { icon: "🚚", title: "Quick Delivery", desc: "On all orders, every day" },
@@ -15,41 +10,6 @@ const features = [
 ];
 
 const Home = () => {
-  const { products = [], productsLoading } = useAppContext();
-
-  // Helper function to get products by category
-  const getProductsByCategory = (categoryName) => {
-    return products
-      .filter((p) => categoryMatches(p.category, categoryName))
-      .slice(0, 5);
-  };
-
-  // Component for category section
-  const CategorySection = ({ categoryName, title, icon }) => {
-    const categoryProducts = getProductsByCategory(categoryName);
-    if (categoryProducts.length === 0) return null;
-
-    return (
-      <div className="mt-16">
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <p className="text-xs font-bold tracking-widest mb-1" style={{ color: "#1B3A6B" }}>SHOP</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">{icon} {title}</h2>
-            <div className="mt-2 h-1 w-12 rounded-full" style={{ background: "#1B3A6B" }} />
-          </div>
-          <Link to={`/products/${categoryName.toLowerCase()}`} className="text-sm font-medium hover:underline cursor-pointer" style={{ color: "#1B3A6B" }}>
-            View all →
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {categoryProducts.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="mt-6 space-y-0">
 
@@ -73,17 +33,6 @@ const Home = () => {
 
       {/* Trending Products Carousel */}
       <TrendingCarousel />
-
-      {/* Show each homepage category with its own products. */}
-      <div className="mt-4">
-        {categories.slice(0, 8).map((category) => (
-          <CategorySection
-            key={category.path}
-            categoryName={category.path}
-            title={category.text}
-          />
-        ))}
-      </div>
 
       {/* Best Products section removed per request */}
     </div>

@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
 import { useAppContext } from "../context/AppContext";
 import { categories as CATEGORY_LIST } from "../assets/assets";
 
@@ -17,6 +16,44 @@ const FEATURED_CATEGORIES = [
   "Baby Items",
 ];
 
+const normalizeCommand = (text) => text.toLowerCase()
+  .replace(/[’']/g, "")
+  .replace(/[^a-z0-9\s]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const isOrderTopic = (text) => /\b(order|orders|ordar|ordr)\b/.test(normalizeCommand(text));
+const isCancelRequest = (text) => isOrderTopic(text)
+  && /\b(cancel|cancle|cancell|cancellation|cancelled|canceled|cancelling|radd|mansookh|mansukh)\b/.test(normalizeCommand(text));
+const isTrackRequest = (text) => {
+  const normalized = normalizeCommand(text);
+  return isOrderTopic(text)
+    && (/\b(track|tracking|status|kahan|kidhar|pohanch|pahuncha|pahunch|deliver|mil gaya|kab|aayega|ayega|aayegi|ayegi)\b/.test(normalized)
+      || /\bwhere\b.*\b(order|orders)\b/.test(normalized));
+};
+const isPlaceOrderRequest = (text) => {
+  const normalized = normalizeCommand(text);
+  return /\b(i want|i wanna|want|wanna|would like|like to|please|how to|help me|mujhe|mujhay|mujay|main|me)\b.*\b(order|ordar|ordr|buy|purchase)\b/.test(normalized)
+    || /\b(order|ordar|ordr)\s+(karo|karein|kar|kr|karna|krna|mangwao|mangwana)\b/.test(normalized)
+    || /\b(order|ordar|ordr)\b.*\b(nahi aata|nahi ata|nhi ata|nahi ati|nhi ati|how to)\b/.test(normalized);
+};
+const extractProductQuery = (text) => normalizeCommand(text)
+  .replace(/\b\d+\b/g, " ")
+  .replace(/\b(i|want|wanna|would|like|please|how|to|order|ordar|ordr|buy|purchase|add|some|a|an|the|of|cart|can|could|may|mujhe|mujhay|mujay|mujhko|main|mai|chahiye|chaiye|chahta|chahti|karna|krna|karo|krdo|kardo|hai|ha|hun|hoon|do|now)\b/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const CATEGORY_ALIASES = {
+  Electronics: ["electronics", "electronic"],
+  Sports: ["sports", "sport", "khel"],
+  Grocery: ["grocery", "groceries", "rashan", "kirana"],
+  Meat: ["meat", "gosht"],
+  Beauty: ["beauty", "makeup", "cosmetics"],
+  Kitchen: ["kitchen", "rasoi"],
+  Garments: ["garments", "clothes", "clothing", "kapray", "kapre"],
+  "Baby Items": ["baby items", "baby", "kids", "bachon ke saman"],
+};
+
 const initialMessages = [];
 
 const Chatbot = () => {
@@ -26,7 +63,8 @@ const Chatbot = () => {
   const [loading, setLoading] = useState(false);
   const [expectingPage, setExpectingPage] = useState(false);
   const [initialPromptPending, setInitialPromptPending] = useState(false);
-  const { user, navigate, setSearchQuery, products } = useAppContext();
+  const [orderFlow, setOrderFlow] = useState(null);
+  const { user, navigate, setSearchQuery, products, addToCart, cartItems, setCartItems, axios, setShowUserLogin } = useAppContext();
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -46,6 +84,247 @@ const Chatbot = () => {
     setInitialPromptPending(true);
   }, [open]);
 
+  const askForCategory = (intro = "Choose a category to browse:") => {
+    setMessages((prev) => [...prev, {
+      sender: "bot",
+      text: intro,
+      actions: FEATURED_CATEGORIES.map((category) => ({ type: "ORDER_CATEGORY", value: category, label: category })),
+    }]);
+  };
+
+  const beginOrder = () => {
+    setInitialPromptPending(false);
+    setExpectingPage(false);
+    if (!user) {
+      setMessages((prev) => [...prev, { sender: "bot", text: "Please sign in first. After you sign in, tell me you want to order and I’ll help you choose products." }]);
+      setShowUserLogin(true);
+      return;
+    }
+    setOrderFlow({ stage: "category" });
+    navigate("/products");
+    askForCategory("I opened all products. Which category would you like to shop from?");
+  };
+
+  const findCategory = (text) => {
+    const normalized = normalizeCommand(text);
+    return FEATURED_CATEGORIES.find((category) => CATEGORY_ALIASES[category].some((alias) =>
+      normalized === alias || normalized.includes(alias)
+    ));
+  };
+
+  const getCategoryProducts = (category) => products
+    .filter((product) => product.category?.toLowerCase() === category.toLowerCase())
+    .filter((product) => product.stock == null ? product.inStock !== false : Number(product.stock) > 0)
+    .slice(0, 8);
+
+  const showCategoryProducts = (category) => {
+    setOrderFlow({ stage: "shopping", category });
+    navigate(`/products/${encodeURIComponent(category.toLowerCase())}`);
+    const available = getCategoryProducts(category);
+    setMessages((prev) => [...prev, {
+      sender: "bot",
+      text: available.length
+        ? `Here are some ${category} products. Choose one to add it to your cart, or type a product name and quantity.`
+        : `I opened ${category}. I couldn't find available items in that category right now. Try another category.`,
+      actions: [
+        ...available.map((product) => ({ type: "ADD_PRODUCT", productId: product._id, label: `Add ${product.name}` })),
+        { type: "ORDER_CATEGORY", value: "", label: "Choose another category" },
+        ...(available.length ? [{ type: "ORDER_DONE", label: "Done shopping" }] : []),
+      ],
+    }]);
+  };
+
+  const askNextOrderStep = (productName) => {
+    setMessages((prev) => [...prev, {
+      sender: "bot",
+      text: `${productName} added. Would you like to select more products or place your order?`,
+      actions: [
+        { type: "ORDER_MORE", label: "Select more products" },
+        { type: "ORDER_PLACE", label: "Place my order" },
+      ],
+    }]);
+  };
+
+  const askOrderIntent = () => {
+    setInitialPromptPending(false);
+    setExpectingPage(false);
+    setMessages((prev) => [...prev, {
+      sender: "bot",
+      text: "How can I help with your order?",
+      actions: [
+        { type: "ORDER_START", label: "Place an order" },
+        { type: "ORDER_TRACK", label: "Track an order" },
+        { type: "ORDER_CANCEL", label: "Cancel an order" },
+      ],
+    }]);
+  };
+
+  const askOrderMethod = () => {
+    setOrderFlow({ stage: "method" });
+    setMessages((prev) => [...prev, {
+      sender: "bot",
+      text: "Would you like me to place the order, or would you prefer to complete it yourself?",
+      actions: [
+        { type: "ORDER_VIA_ASSISTANT", label: "Place it for me" },
+        { type: "ORDER_SELF", label: "I’ll do it myself" },
+      ],
+    }]);
+  };
+
+  const trackOrders = async () => {
+    if (!user) {
+      setMessages((prev) => [...prev, { sender: "bot", text: "Please sign in to track your orders." }]);
+      setShowUserLogin(true);
+      return;
+    }
+    try {
+      const { data } = await axios.get("/api/order/user");
+      const orders = data.orders || [];
+      if (!data.success || !orders.length) {
+        setMessages((prev) => [...prev, { sender: "bot", text: "I couldn't find any orders on your account." }]);
+        return;
+      }
+      const latest = orders[0];
+      setMessages((prev) => [...prev, {
+        sender: "bot",
+        text: `Your latest order (${latest._id}) is ${latest.status}. Placed ${new Date(latest.createdAt).toLocaleDateString()}. I’m opening your orders for the full details.`,
+      }]);
+      navigate("/my-orders");
+    } catch (error) {
+      setMessages((prev) => [...prev, { sender: "bot", text: error.response?.data?.message || "I couldn't load your orders just now." }]);
+    }
+  };
+
+  const showOrdersToCancel = async () => {
+    if (!user) {
+      setMessages((prev) => [...prev, { sender: "bot", text: "Please sign in to cancel an order." }]);
+      setShowUserLogin(true);
+      return;
+    }
+    try {
+      const { data } = await axios.get("/api/order/user");
+      const cancellable = (data.orders || []).filter((order) => String(order.status).toLowerCase() === "confirmed");
+      if (!data.success || !cancellable.length) {
+        setMessages((prev) => [...prev, { sender: "bot", text: "There are no orders available to cancel." }]);
+        return;
+      }
+      setMessages((prev) => [...prev, {
+        sender: "bot",
+        text: "Which order would you like to cancel?",
+        actions: cancellable.map((order) => {
+          const productNames = (order.items || [])
+            .map((item) => {
+              const name = item.product?.name || item.name;
+              return name ? `${name} × ${item.quantity || 1}` : null;
+            })
+            .filter(Boolean)
+            .join(", ");
+          const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "";
+          const amount = order.amount ? `Rs. ${order.amount}` : "";
+          const details = [productNames || "Order items unavailable", amount, orderDate].filter(Boolean).join(" · ");
+          return {
+            type: "CANCEL_ORDER",
+            orderId: order._id,
+            label: details,
+          };
+        }),
+      }]);
+    } catch (error) {
+      setMessages((prev) => [...prev, { sender: "bot", text: error.response?.data?.message || "I couldn't load your orders just now." }]);
+    }
+  };
+
+  const placeAssistedOrder = async () => {
+    if (!user) {
+      setMessages((prev) => [...prev, { sender: "bot", text: "Please sign in before I can place your order." }]);
+      setShowUserLogin(true);
+      return;
+    }
+    const items = Object.entries(cartItems).map(([product, quantity]) => ({ product, quantity: Number(quantity) }));
+    if (!items.length) {
+      setMessages((prev) => [...prev, { sender: "bot", text: "Your cart is empty. Tell me what you’d like to order first." }]);
+      setOrderFlow({ stage: "category" });
+      askForCategory();
+      return;
+    }
+    try {
+      const { data } = await axios.get("/api/address/get");
+      const addresses = data.addresses || [];
+      if (!addresses.length) {
+        setMessages((prev) => [...prev, { sender: "bot", text: "You need a delivery address first. Add one and I’ll place your order automatically." }]);
+        navigate("/add-address", { state: { chatbotAutoOrder: true } });
+        return;
+      }
+      const { data: orderData } = await axios.post("/api/order/cod", {
+        items,
+        address: addresses[0]._id || addresses[0].id,
+      });
+      if (!orderData.success) throw new Error(orderData.message || "Order could not be placed");
+      setCartItems({});
+      setOrderFlow(null);
+      setMessages((prev) => [...prev, { sender: "bot", text: `Your order has been placed successfully. Order ID: ${orderData.orderId}. Opening your orders now.` }]);
+      navigate("/my-orders");
+    } catch (error) {
+      setMessages((prev) => [...prev, { sender: "bot", text: error.response?.data?.message || error.message || "I couldn't place the order. Please review your cart and try again." }]);
+    }
+  };
+
+  const handleChatAction = async (action) => {
+    if (action.type === "ORDER_START") return beginOrder();
+    if (action.type === "ORDER_TRACK") return trackOrders();
+    if (action.type === "ORDER_CANCEL") return showOrdersToCancel();
+    if (action.type === "ORDER_CATEGORY") {
+      if (!action.value) {
+        setOrderFlow({ stage: "category" });
+        return askForCategory("Which category would you like?");
+      }
+      setMessages((prev) => [...prev, { sender: "user", text: action.value }]);
+      return showCategoryProducts(action.value);
+    }
+    if (action.type === "ADD_PRODUCT") {
+      const product = products.find((item) => String(item._id) === String(action.productId));
+      if (!product) return;
+      setMessages((prev) => [...prev, { sender: "user", text: `Add ${product.name}` }]);
+      if (addToCart(product._id)) {
+        setOrderFlow({ stage: "shopping", category: product.category });
+        askNextOrderStep(product.name);
+      }
+      return;
+    }
+    if (action.type === "ORDER_MORE") {
+      setMessages((prev) => [...prev, { sender: "user", text: "Select more products" }]);
+      setOrderFlow({ stage: "category" });
+      return askForCategory("Choose a category for more products:");
+    }
+    if (action.type === "ORDER_PLACE") {
+      setMessages((prev) => [...prev, { sender: "user", text: "Place my order" }]);
+      return askOrderMethod();
+    }
+    if (action.type === "ORDER_DONE") {
+      setMessages((prev) => [...prev, { sender: "user", text: "Done shopping" }]);
+      return askOrderMethod();
+    }
+    if (action.type === "ORDER_VIA_ASSISTANT") {
+      setMessages((prev) => [...prev, { sender: "user", text: "Place it for me" }]);
+      return placeAssistedOrder();
+    }
+    if (action.type === "ORDER_SELF") {
+      setMessages((prev) => [...prev, { sender: "user", text: "I’ll do it myself" }]);
+      setOrderFlow(null);
+      setMessages((prev) => [...prev, { sender: "bot", text: "Ok, thanks for choosing GoCart." }]);
+      return;
+    }
+    if (action.type === "CANCEL_ORDER") {
+      setMessages((prev) => [...prev, { sender: "user", text: `Cancel order ${action.orderId}` }]);
+      try {
+        const { data } = await axios.put(`/api/order/cancel/${action.orderId}`);
+        setMessages((prev) => [...prev, { sender: "bot", text: data.message || "Your order was cancelled." }]);
+      } catch (error) {
+        setMessages((prev) => [...prev, { sender: "bot", text: error.response?.data?.message || "I couldn't cancel that order." }]);
+      }
+    }
+  };
+
   const sendQuestion = async (question) => {
     const userMessage = { sender: "user", text: question };
     setMessages((prev) => [...prev, userMessage]);
@@ -54,11 +333,112 @@ const Chatbot = () => {
     // simple page-open flow handling
     const lc = question.toLowerCase();
 
+    if (isCancelRequest(question)) {
+      await showOrdersToCancel();
+      setLoading(false);
+      return;
+    }
+    if (isTrackRequest(question)) {
+      await trackOrders();
+      setLoading(false);
+      return;
+    }
+    const currentCategoryProducts = orderFlow?.stage === "shopping"
+      ? getCategoryProducts(orderFlow.category)
+      : [];
+    const requestedProductWords = extractProductQuery(question).split(" ").filter(Boolean);
+    const mentionsCurrentCategoryProduct = requestedProductWords.length > 0
+      && currentCategoryProducts.some((product) => {
+        const productName = normalizeCommand(product.name);
+        return requestedProductWords.every((word) => productName.includes(word)
+          || (word.endsWith("s") && productName.includes(word.slice(0, -1))));
+      });
+
+    if (orderFlow?.stage === "shopping" && isPlaceOrderRequest(question) && !mentionsCurrentCategoryProduct) {
+      askOrderMethod();
+      setLoading(false);
+      return;
+    }
+    if (!orderFlow && isOrderTopic(question)) {
+      askOrderIntent();
+      setLoading(false);
+      return;
+    }
+
+    if (orderFlow?.stage === "category") {
+      const category = findCategory(question);
+      if (category) showCategoryProducts(category);
+      else askForCategory("Please choose one of these categories:");
+      setLoading(false);
+      return;
+    }
+
+    if (orderFlow?.stage === "shopping") {
+      if (/\b(no|done|finished|that’s all|thats all|bas|bus|kafi)\b/i.test(question)) {
+        askOrderMethod();
+        setLoading(false);
+        return;
+      }
+      if (/\b(yes|more|another|different category|select more|aur|mazeed|zyada|kuch aur)\b/i.test(question)) {
+        setOrderFlow({ stage: "category" });
+        askForCategory("Sure. Choose another category:");
+        setLoading(false);
+        return;
+      }
+      if (/\b(place|checkout|order now|order karo|order krdo)\b/i.test(question)) {
+        askOrderMethod();
+        setLoading(false);
+        return;
+      }
+      const category = findCategory(question);
+      if (category) {
+        showCategoryProducts(category);
+        setLoading(false);
+        return;
+      }
+      const quantity = Number(question.match(/\b(\d+)\b/)?.[1] || 1);
+      const productQuery = extractProductQuery(question);
+      const matchingProducts = currentCategoryProducts.filter((product) => {
+        const name = normalizeCommand(product.name);
+        return productQuery && productQuery.split(" ").every((word) => name.includes(word)
+          || (word.endsWith("s") && name.includes(word.slice(0, -1))));
+      });
+      if (matchingProducts.length === 1) {
+        const product = matchingProducts[0];
+        if (addToCart(product._id, quantity)) {
+          askNextOrderStep(`${quantity} ${product.name}${quantity === 1 ? "" : "s"}`);
+        }
+      } else if (matchingProducts.length > 1) {
+        setMessages((prev) => [...prev, {
+          sender: "bot",
+          text: "I found a few matches. Choose the product you meant:",
+          actions: matchingProducts.map((product) => ({ type: "ADD_PRODUCT", productId: product._id, label: product.name })),
+        }]);
+      } else {
+        setMessages((prev) => [...prev, { sender: "bot", text: `I couldn't find that in ${orderFlow.category}. Try a product name, or choose another category.` }]);
+      }
+      setLoading(false);
+      return;
+    }
+
+    if (orderFlow?.stage === "method") {
+      if (/\b(via me|for me|you|place it|do it|mere liye|aap|ap|kar do|kr do|krdo|kardo)\b/i.test(question)) {
+        await placeAssistedOrder();
+      } else if (/\b(myself|by myself|by me|i will|ill do|khud|main khud|mai khud)\b/i.test(question)) {
+        setOrderFlow(null);
+        setMessages((prev) => [...prev, { sender: "bot", text: "Ok, thanks for choosing GoCart." }]);
+      } else {
+        askOrderMethod();
+      }
+      setLoading(false);
+      return;
+    }
+
     // If initial yes/no follow-up is pending, require yes/no first
     if (initialPromptPending) {
       if (/^\s*yes\s*$/.test(lc) || /^\s*y(es)?[,!.]*/.test(lc)) {
         setInitialPromptPending(false);
-        setMessages((prev) => [...prev, { sender: "bot", text: "Sure — which page would you like me to open? (e.g. orders, cart, profile, wishlist, products, contact)" }] );
+        setMessages((prev) => [...prev, { sender: "bot", text: "Sure — which page would you like me to open? (e.g. orders, cart, profile, wishlist, products, contact)" }]);
         setExpectingPage(true);
         setLoading(false);
         return;
@@ -97,23 +477,25 @@ const Chatbot = () => {
 
     // product name suggestion: if user typed product-like query, suggest matches
     const suggestMatches = () => {
-      let q = question.trim().toLowerCase().replace(/[^a-z0-9\s]/g, "");
-      
+      const orderIntentMatch = question.match(/\b(?:i want to order|i would like to order|i'd like to order|want to order|please order|order me|i want to buy|i would like to buy|i'd like to buy|want to buy)\s+(.+)/i);
+      let q = orderIntentMatch?.[1] || question.trim().toLowerCase();
+      q = q.replace(/^(?:some|a|an|the)\s+/i, "").replace(/[^a-z0-9\s]/g, "");
+
       // Extract search term from intent phrases: "i want X", "where is X", "show me X", etc.
       const intentMatch = question.toLowerCase().match(/(i want|want|looking for|where is|show me|find|search for|do you have|need)\s+(.+)/i);
-      if (intentMatch && intentMatch[2]) {
+      if (!orderIntentMatch && intentMatch && intentMatch[2]) {
         q = intentMatch[2].trim().toLowerCase().replace(/[^a-z0-9\s]/g, "");
       }
-      
+
       if (!q || q.length < 2 || !Array.isArray(products) || products.length === 0) return { directMatches: [], categoryMatches: [], searchQuery: q };
-      
+
       // simple singular handling: strip trailing 's' for short plural forms
       const qVariants = [q];
       if (q.endsWith("s") && q.length > 2) qVariants.push(q.slice(0, -1));
 
       const directMatches = [];
       const categoryMatches = [];
-      
+
       for (const p of products) {
         // Skip unavailable products
         if (p.name === "Eggs 12 pcs" || p.name === "Amul Milk 1L") continue;
@@ -147,14 +529,47 @@ const Chatbot = () => {
           categoryMatches.push(p);
         }
       }
-      
+
       return { directMatches, categoryMatches, searchQuery: q };
     };
 
     const { directMatches, categoryMatches, searchQuery } = suggestMatches();
     const allMatches = [...directMatches, ...categoryMatches];
+    const orderIntent = /\b(?:i want to order|i would like to order|i'd like to order|want to order|please order|order me|i want to buy|i would like to buy|i'd like to buy|want to buy)\b/i.test(question);
     const intentRegex = /(i want|want|looking for|where is|show me|find|search for|do you have|need)\s+/i;
-    
+
+    if (orderIntent && allMatches.length > 0) {
+      const normalizedQuery = searchQuery.replace(/\s+/g, " ").trim();
+      const exactProduct = directMatches.find((product) =>
+        (product.name || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() === normalizedQuery
+      );
+
+      if (exactProduct || directMatches.length === 1) {
+        handleSuggestionClick((exactProduct || directMatches[0])._id);
+      } else {
+        const matches = directMatches.length > 0 ? directMatches : categoryMatches;
+        const bestMatch = [...matches].sort((a, b) => {
+          const score = (product) => {
+            const name = (product.name || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+            if (name.startsWith(`${normalizedQuery} `)) return 0;
+            if (name.includes(normalizedQuery)) return 1;
+            return 2;
+          };
+          return score(a) - score(b);
+        })[0];
+        const categoryName = bestMatch?.category || "Products";
+        const categoryPage = CATEGORY_LIST.find((category) =>
+          [category.text, category.path].some((value) => value.toLowerCase() === categoryName.toLowerCase())
+        );
+        const categoryPath = categoryPage?.path || categoryName;
+        setMessages((prev) => [...prev, { sender: "bot", text: `Opening ${categoryPage?.text || categoryName} category for you.` }]);
+        navigate(`/products/${encodeURIComponent(categoryPath.toLowerCase())}`);
+      }
+
+      setLoading(false);
+      return;
+    }
+
     if (allMatches && allMatches.length > 0) {
       // show suggestions with actions
       let suggestionText = "";
@@ -165,7 +580,7 @@ const Chatbot = () => {
       } else if (categoryMatches.length > 0) {
         suggestionText = `We don't have that exact product, but here are other ${searchQuery} items from our categories:`;
       }
-      
+
       const limited = allMatches.slice(0, 6).map(p => ({ id: p._id, name: p.name, category: p.category }));
       // add a 'show all' option at the top
       const suggestionsArr = [{ id: "SHOW_ALL", name: "Show all matching products", query: question }, ...limited];
@@ -223,18 +638,18 @@ const Chatbot = () => {
     const category = encodeURIComponent((p.category || "").toString());
     const path = `/product/${category}/${p._id}`;
     setMessages((prev) => [...prev, { sender: "bot", text: `Opening product: ${p.name}` }]);
-    try { navigate(path); } catch (e) {}
+    try { navigate(path); } catch (e) { }
   };
 
   const handleShowAllMatches = (query) => {
     const q = (query || "").trim();
     if (!q) {
       setMessages((prev) => [...prev, { sender: "bot", text: "Opening all products." }]);
-      try { navigate("/products"); } catch (e) {}
+      try { navigate("/products"); } catch (e) { }
       return;
     }
     setMessages((prev) => [...prev, { sender: "bot", text: `Showing all products matching "${q}".` }]);
-    try { setSearchQuery(q); navigate("/products"); } catch (e) {}
+    try { setSearchQuery(q); navigate("/products"); } catch (e) { }
   };
 
   const handleOpenPageByText = (text) => {
@@ -254,7 +669,7 @@ const Chatbot = () => {
       for (const k of m.keys) {
         if (lc.includes(k)) {
           setMessages((prev) => [...prev, { sender: "bot", text: `Opening ${m.path === "/" ? "home" : k} for you now.` }]);
-          try { navigate(m.path); } catch (e) {}
+          try { navigate(m.path); } catch (e) { }
           return true;
         }
       }
@@ -267,7 +682,7 @@ const Chatbot = () => {
       if (lc.includes(t) || lc.includes(p)) {
         const target = `/products/${p}`;
         setMessages((prev) => [...prev, { sender: "bot", text: `Opening ${cat.text} category for you.` }]);
-        try { navigate(target); } catch (e) {}
+        try { navigate(target); } catch (e) { }
         return true;
       }
     }
@@ -277,14 +692,14 @@ const Chatbot = () => {
     if (searchMatch) {
       const query = searchMatch[1].trim();
       setMessages((prev) => [...prev, { sender: "bot", text: `Searching products for "${query}" and opening products list.` }]);
-      try { setSearchQuery(query); navigate("/products"); } catch (e) {}
+      try { setSearchQuery(query); navigate("/products"); } catch (e) { }
       return true;
     }
 
     // trending / featured
     if (lc.includes("trending") || lc.includes("trending products") || lc.includes("best sellers") || lc.includes("popular")) {
       setMessages((prev) => [...prev, { sender: "bot", text: "Opening products — showing trending/featured items." }]);
-      try { navigate("/products"); } catch (e) {}
+      try { navigate("/products"); } catch (e) { }
       return true;
     }
 
@@ -335,6 +750,20 @@ const Chatbot = () => {
                           className="text-left px-3 py-1 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-xs"
                         >
                           {s.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {message.actions && Array.isArray(message.actions) && (
+                    <div className="mt-2 flex flex-col gap-2">
+                      {message.actions.map((action, actionIndex) => (
+                        <button
+                          key={`${action.type}:${action.value || action.orderId || action.productId || actionIndex}`}
+                          type="button"
+                          onClick={() => handleChatAction(action)}
+                          className="text-left px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-xs"
+                        >
+                          {action.label}
                         </button>
                       ))}
                     </div>

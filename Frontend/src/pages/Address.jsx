@@ -1,23 +1,25 @@
 import { useContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
 import { BtnSpinner } from "../components/Loading";
 import toast from "react-hot-toast";
 
 const FIELDS = [
-  { name: "firstName",  label: "First Name",  type: "text",   half: true },
-  { name: "lastName",   label: "Last Name",   type: "text",   half: true },
-  { name: "email",      label: "Email",       type: "email",  half: false },
-  { name: "street",     label: "Street",      type: "text",   half: false },
-  { name: "city",       label: "City",        type: "text",   half: true },
-  { name: "state",      label: "State",       type: "text",   half: true },
-  { name: "zipCode",    label: "Zip Code",    type: "number", half: true },
-  { name: "country",    label: "Country",     type: "text",   half: true },
-  { name: "phone",      label: "Phone",       type: "tel",    half: false },
+  { name: "firstName", label: "First Name", type: "text", half: true },
+  { name: "lastName", label: "Last Name", type: "text", half: true },
+  { name: "email", label: "Email", type: "email", half: false },
+  { name: "street", label: "Street", type: "text", half: false },
+  { name: "city", label: "City", type: "text", half: true },
+  { name: "state", label: "State", type: "text", half: true },
+  { name: "zipCode", label: "Zip Code", type: "number", half: true },
+  { name: "country", label: "Country", type: "text", half: true },
+  { name: "phone", label: "Phone", type: "tel", half: false },
 ];
 
 const Address = () => {
   const { axios, user, navigate } = useContext(AppContext);
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: user?.email || "",
@@ -35,7 +37,7 @@ const Address = () => {
       const { data } = await axios.post("/api/address/add", { address: form });
       if (data.success) {
         toast.success(data.message);
-        navigate("/cart");
+        navigate("/cart", { state: { chatbotAutoOrder: Boolean(location.state?.chatbotAutoOrder) } });
       } else {
         toast.error(data.message);
       }
